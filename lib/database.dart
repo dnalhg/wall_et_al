@@ -20,7 +20,7 @@ class ExpenseDatabase {
   static final Future<Database> database = _initDatabase();
   static const String dbTableName = 'expenses';
 
-  const ExpenseDatabase();
+  static ExpenseDatabase instance = ExpenseDatabase();
 
   static Future<Database> _initDatabase() async {
     String dbPath = join(await getDatabasesPath(), 'expense_database.db');

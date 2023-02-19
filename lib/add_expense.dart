@@ -4,8 +4,6 @@ import 'calculator.dart';
 import 'database.dart';
 
 class AddExpenseRoute extends StatefulWidget {
-  final ExpenseDatabase db = const ExpenseDatabase();
-
   const AddExpenseRoute({super.key});
 
   @override
@@ -60,7 +58,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
           description: 'TODO',
           category: _selectedCategory,
         );
-        int status = await widget.db.insertExpense(e);
+        int status = await ExpenseDatabase.instance.insertExpense(e);
         if (status != 0) {
           return;
         }

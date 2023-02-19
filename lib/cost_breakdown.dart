@@ -4,7 +4,6 @@ import 'database.dart';
 
 class CostBreakdown extends StatefulWidget {
   final String filter;
-  final ExpenseDatabase db = const ExpenseDatabase();
 
   const CostBreakdown({super.key, required this.filter});
 
@@ -22,7 +21,7 @@ class _CostBreakdownState extends State<CostBreakdown>{
   }
 
   Future<List<ExpenseEntry>> _getExpenses() {
-    return widget.db.getExpenses(widget.filter);
+    return ExpenseDatabase.instance.getExpenses(widget.filter);
   }
 
   @override
