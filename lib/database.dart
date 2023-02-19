@@ -44,10 +44,9 @@ class ExpenseDatabase {
     );
   }
 
-  Future<List<ExpenseEntry>> getAllExpenses() async {
+  Future<List<ExpenseEntry>> getExpenses(String filter) async {
     final db = await database;
-    final List<Map<String, dynamic>> expenses = await db.query(dbTableName);
-    return expenses.map((m) => ExpenseEntry.fromMap(m)).toList();
+    return (await db.query(dbTableName)).map((m) => ExpenseEntry.fromMap(m)).toList();
   }
 }
 

@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'database.dart';
 
 class CostBreakdown extends StatefulWidget {
+  final String filter;
   final ExpenseDatabase db = const ExpenseDatabase();
 
-  const CostBreakdown({super.key});
+  const CostBreakdown({super.key, required this.filter});
 
   @override
   State<CostBreakdown> createState() => _CostBreakdownState();
@@ -20,8 +21,8 @@ class _CostBreakdownState extends State<CostBreakdown>{
     );
   }
 
-  Future<List<ExpenseEntry>> _getExpenses() async {
-    return await widget.db.getAllExpenses();
+  Future<List<ExpenseEntry>> _getExpenses() {
+    return widget.db.getExpenses(widget.filter);
   }
 
   @override
@@ -30,6 +31,10 @@ class _CostBreakdownState extends State<CostBreakdown>{
     _getExpenses();
   }
 
+  @override
+  void didUpdateWidget(CostBreakdown oldWidget) {
+    super.didUpdateWidget(oldWidget);
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -16,26 +16,33 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Wall Et Al',
       theme: ThemeData(brightness: Brightness.dark),
-      home: const Main(),
+      home: Main(),
     );
   }
 }
 
-class Main extends StatelessWidget {
-  const Main ({super.key});
+class Main extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => _MainState();
+}
+class _MainState extends State<Main>{
+
+  String filter = '';
 
   void _navigateToAddExpenseRoute(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const AddExpenseRoute()),
-    );
+    ).then((val) => setState(() {
+        filter = filter;
+      }));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: CostBreakdown(),
+      body: CostBreakdown(filter: filter),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToAddExpenseRoute(context),
         backgroundColor: Colors.lightBlue,
