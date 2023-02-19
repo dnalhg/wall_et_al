@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
 import 'calculator.dart';
+import 'database.dart';
 
 class AddExpenseRoute extends StatefulWidget {
+  final ExpenseDatabase db = const ExpenseDatabase();
+
   const AddExpenseRoute({super.key});
 
   @override
@@ -30,9 +33,44 @@ class _AddExpenseState extends State<AddExpenseRoute> {
     });
   }
 
-  void _saveExpense() {
+  void _raiseError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  bool _saveExpense() {
     double finalAmount = _getFinalAmount == null ? double.nan : _getFinalAmount!();
-    // TODO Save in database
+    if (finalAmount.isNaN) {
+      _raiseError("Invalid amount entered");
+      return false;
+    }
+
+    Future<void> tryAddEntry() async {
+      // Try insert 5 times with retries
+      for (int i=0; i < 5; i++) {
+        String dbId = DatabaseUtils.createCryptoRandomString();
+        ExpenseEntry e = ExpenseEntry(
+          id: dbId,
+          amount: finalAmount,
+          msSinceEpoch: DateTime.now().millisecondsSinceEpoch, //TODO: Support inputted time
+          description: 'TODO',
+          category: _selectedCategory,
+        );
+        int status = await widget.db.insertExpense(e);
+        if (status != 0) {
+          return;
+        }
+      }
+      // Failed to add so raise an error
+      _raiseError("Could not add expense to database");
+    }
+
+    tryAddEntry();
+    return true;
   }
 
   Widget _currentAmountDisplay() {
@@ -58,9 +96,10 @@ class _AddExpenseState extends State<AddExpenseRoute> {
         actions: [
           IconButton(
             icon: const Icon(Icons.check),
-            onPressed: () {
-              _saveExpense();
-              Navigator.of(context).pop();
+            onPressed: () async {
+              if (_saveExpense()) {
+                Navigator.of(context).pop();
+              }
             },
           ),
         ],

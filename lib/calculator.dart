@@ -130,7 +130,7 @@ class _CalculatorState extends State<Calculator> {
   }
 
   void _registerButton(String value) {
-    if (_prevInput == "ERR") {
+    if (_prevInput == "ERR" || _currentInput == "ERR") {
       _resetState();
     }
     if (_CalculatorOperationsExt.isArithmeticOperation(value)) {
