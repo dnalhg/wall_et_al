@@ -22,6 +22,8 @@ class MyApp extends StatelessWidget {
 }
 
 class Main extends StatefulWidget {
+  const Main({super.key});
+
   @override
   State<StatefulWidget> createState() => _MainState();
 }

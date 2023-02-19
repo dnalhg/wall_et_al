@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
 import 'custom_icons.dart';
+import 'database.dart';
 
 class Calculator extends StatefulWidget {
   final Function onButtonPressed;
   final Function getFinalAmountCallback;
+  final ExpenseEntry? entry;
 
-  const Calculator({super.key, required this.onButtonPressed, required this.getFinalAmountCallback});
+  const Calculator({super.key, required this.onButtonPressed, required this.getFinalAmountCallback, this.entry});
 
   @override
   State<Calculator> createState() => _CalculatorState();
@@ -17,14 +19,21 @@ class _CalculatorState extends State<Calculator> {
   String? _currentAction;
   late String _currentInput;
 
-  _CalculatorState() {
-    _resetState();
+  @override
+  void initState() {
+    super.initState();
+    _resetState(entry: widget.entry);
   }
 
-  void _resetState() {
+  void _resetState({ExpenseEntry? entry}) {
+    if (entry == null) {
+      _currentInput = '';
+    } else {
+      _currentInput = _getComputedAmountAsString(entry.amount);
+      WidgetsBinding.instance.addPostFrameCallback((_) => widget.onButtonPressed(_currentInput));
+    }
     _prevInput = null;
     _currentAction = null;
-    _currentInput = '';
   }
 
   void _modifyCurrentInput(String value) {

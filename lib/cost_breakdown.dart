@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'add_expense.dart';
 import 'database.dart';
 
 class CostBreakdown extends StatefulWidget {
@@ -13,10 +14,22 @@ class CostBreakdown extends StatefulWidget {
 
 class _CostBreakdownState extends State<CostBreakdown>{
 
-  ListTile _createExpenseView(ExpenseEntry e) {
+  void _expandExpense(BuildContext context, ExpenseEntry e) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AddExpenseRoute(entry: e)),
+    ).then((_) => setState(() {}));
+  }
+
+  ListTile _createExpenseView(BuildContext context, ExpenseEntry e) {
     return ListTile(
-      title: Text(e.description),
-      subtitle: Text(e.amount.toStringAsFixed(2)),
+      leading: const CircleAvatar(
+        child: Icon(Icons.heart_broken),
+      ),
+      title: Text(e.category),
+      subtitle: Text(e.description),
+      trailing: Text(e.amount.toStringAsFixed(2)),
+      onTap: () => _expandExpense(context, e),
     );
   }
 
@@ -44,7 +57,7 @@ class _CostBreakdownState extends State<CostBreakdown>{
           final List<ExpenseEntry> entries = snapshot.data!;
           return ListView.builder(
             itemCount: entries.length,
-            itemBuilder: (context, idx) => _createExpenseView(entries[idx]),
+            itemBuilder: (context, idx) => _createExpenseView(context, entries[idx]),
           );
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');

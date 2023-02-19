@@ -44,6 +44,18 @@ class ExpenseDatabase {
     );
   }
 
+  Future<int> updateExpense(ExpenseEntry e) async {
+    final db = await database;
+
+    return await db.update(dbTableName, e.toMap(), where: 'id = ?', whereArgs: [e.id]);
+  }
+
+  Future<int> removeExpense(ExpenseEntry e) async {
+    final db = await database;
+
+    return await db.delete(dbTableName, where: 'id = ?', whereArgs: [e.id]);
+  }
+
   Future<List<ExpenseEntry>> getExpenses(String filter) async {
     final db = await database;
     return (await db.query(dbTableName)).map((m) => ExpenseEntry.fromMap(m)).toList();
@@ -89,5 +101,13 @@ class ExpenseEntry {
   @override
   String toString() {
     return "ExpenseEntry($id, $amount, $msSinceEpoch, $description, $category)";
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! ExpenseEntry) {
+      return false;
+    }
+    return other.id == id && other.amount == amount && other.msSinceEpoch == msSinceEpoch && other.category == category;
   }
 }
