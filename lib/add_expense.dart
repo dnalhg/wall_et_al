@@ -43,7 +43,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
   }
 
   bool _saveExpense() {
-    double finalAmount = _getFinalAmount == null ? double.nan : _getFinalAmount!();
+    double finalAmount = _getFinalAmount == null ? 0.0 : _getFinalAmount!();
     if (finalAmount.isNaN) {
       _raiseError("Invalid amount entered");
       return false;

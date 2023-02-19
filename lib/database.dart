@@ -43,6 +43,12 @@ class ExpenseDatabase {
       conflictAlgorithm: ConflictAlgorithm.rollback,
     );
   }
+
+  Future<List<ExpenseEntry>> getAllExpenses() async {
+    final db = await database;
+    final List<Map<String, dynamic>> expenses = await db.query(dbTableName);
+    return expenses.map((m) => ExpenseEntry.fromMap(m)).toList();
+  }
 }
 
 
@@ -60,6 +66,16 @@ class ExpenseEntry {
     required this.description,
     required this.category,
   });
+
+  static ExpenseEntry fromMap(Map<String, dynamic> m) {
+    return ExpenseEntry(
+      id: m['id'],
+      amount: m['amount'],
+      msSinceEpoch: m['msSinceEpoch'],
+      description: m['description'],
+      category: m['category'],
+    );
+  }
 
   Map<String, dynamic> toMap() {
     return {
