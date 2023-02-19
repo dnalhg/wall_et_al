@@ -13,11 +13,15 @@ class _AddExpenseState extends State<AddExpenseRoute> {
 
   // Effectively final
   late Calculator _calculator;
+  Function? _getFinalAmount;
   String displayedAmount = "0";
   String _selectedCategory = 'None';
 
   _AddExpenseState() {
-    _calculator = Calculator(onButtonPressed: _setDisplayedAmount, minVal: 0.0);
+    _calculator = Calculator(
+      onButtonPressed: _setDisplayedAmount,
+      getFinalAmountCallback: (Function callback) => _getFinalAmount = callback,
+    );
   }
 
   void _setDisplayedAmount(String amount) {
@@ -27,7 +31,8 @@ class _AddExpenseState extends State<AddExpenseRoute> {
   }
 
   void _saveExpense() {
-    // Do database saving
+    double finalAmount = _getFinalAmount == null ? double.nan : _getFinalAmount!();
+    // TODO Save in database
   }
 
   Widget _currentAmountDisplay() {
