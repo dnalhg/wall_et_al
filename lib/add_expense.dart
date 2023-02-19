@@ -15,11 +15,12 @@ class AddExpenseRoute extends StatefulWidget {
 class _AddExpenseState extends State<AddExpenseRoute> {
 
   late Calculator _calculator;
-  late String _selectedCategory;
-  int msSinceEpoch = DateTime.now().millisecondsSinceEpoch; // TODO
-  String description = 'TODO'; // TODO
+  late TextEditingController _descriptionController;
+  late TextEditingController _categoryController;
+  int _msSinceEpoch = DateTime.now().millisecondsSinceEpoch; // TODO
   Function? _getFinalAmount;
-  String displayedAmount = "0";
+  String _displayedAmount = "0";
+
 
   @override
   void initState() {
@@ -29,12 +30,13 @@ class _AddExpenseState extends State<AddExpenseRoute> {
       getFinalAmountCallback: (Function callback) => _getFinalAmount = callback,
       entry: widget.entry,
     );
-    _selectedCategory = widget.entry?.category ?? 'None';
+    _categoryController = TextEditingController(text: widget.entry?.category ?? 'None');
+    _descriptionController = TextEditingController(text: widget.entry?.description);
   }
 
   void _setDisplayedAmount(String amount) {
     setState(() {
-      displayedAmount = amount;
+      _displayedAmount = amount;
     });
   }
 
@@ -45,6 +47,14 @@ class _AddExpenseState extends State<AddExpenseRoute> {
         duration: const Duration(seconds: 3),
       ),
     );
+  }
+
+  String _getDescription() {
+    return _descriptionController.value.text;
+  }
+
+  String _getCategory() {
+    return _categoryController.value.text;
   }
 
   bool _saveExpense() {
@@ -62,9 +72,9 @@ class _AddExpenseState extends State<AddExpenseRoute> {
           ExpenseEntry e = ExpenseEntry(
             id: dbId,
             amount: finalAmount,
-            msSinceEpoch: msSinceEpoch,
-            description: description,
-            category: _selectedCategory,
+            msSinceEpoch: _msSinceEpoch,
+            description: _getDescription(),
+            category: _getCategory(),
           );
           int status = await ExpenseDatabase.instance.insertExpense(e);
           if (status != 0) {
@@ -82,9 +92,9 @@ class _AddExpenseState extends State<AddExpenseRoute> {
       ExpenseEntry newEntry = ExpenseEntry(
         id: oldEntry.id,
         amount: finalAmount,
-        msSinceEpoch: msSinceEpoch,
-        description: description,
-        category: _selectedCategory,
+        msSinceEpoch: _msSinceEpoch,
+        description: _getDescription(),
+        category: _getCategory(),
       );
       if (oldEntry == newEntry) {
         return true;
@@ -98,11 +108,68 @@ class _AddExpenseState extends State<AddExpenseRoute> {
   Widget _currentAmountDisplay() {
     return Container(
       decoration: const BoxDecoration(color: Colors.lightBlue),
-      child: Center(
-        child: Text(
-          displayedAmount,
-          style: const TextStyle(fontSize: 48),
-        ),
+      padding: const EdgeInsets.all(16),
+      child: Stack(
+        children: [
+          Positioned(
+            top: 50,
+            right: 20,
+            child: FittedBox(
+              fit: BoxFit.fitWidth,
+              child: Text(_displayedAmount, style: const TextStyle(fontSize: 58, fontWeight: FontWeight.bold)),
+            ),
+          ),
+          Positioned(
+            left: 0,
+            bottom: 100,
+            child: SizedBox(
+              width: 150,
+              child: TextFormField(
+                maxLines: 1,
+                decoration: const InputDecoration(
+                  labelText: 'Category',
+                  floatingLabelStyle: TextStyle(color: Colors.white),
+                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white))
+                ),
+                controller: _categoryController,
+              ),
+            ),
+          ),
+          Positioned(
+            right: 0,
+            bottom: 100,
+            child: InkWell(
+              onTap: () => showDatePicker(
+                context: context,
+                initialDate: DateTime.now(),
+                firstDate: DateTime(2000),
+                lastDate: DateTime(2100),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: const [
+                  Icon(Icons.calendar_today),
+                  SizedBox(width: 8),
+                  Text('Select Date'),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            left: 0,
+            bottom: 0,
+            right: 0,
+            child: TextFormField(
+              maxLines: 1,
+              decoration: const InputDecoration(
+                labelText: 'Description',
+                floatingLabelStyle: TextStyle(color: Colors.white),
+                focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white))
+              ),
+              controller: _descriptionController,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -110,6 +177,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.close),
