@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:wall_et_al/add_categories.dart';
+import 'package:wall_et_al/constants.dart';
+import 'package:wall_et_al/side_bar.dart';
+import 'package:wall_et_al/wallet_app_bar.dart';
 
 import 'add_expense.dart';
 import 'cost_breakdown.dart';
@@ -14,9 +18,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Wall Et Al',
+      title: Constants.APP_NAME,
       theme: ThemeData(brightness: Brightness.dark),
-      home: Main(),
+      home: const Main(),
+      routes: {
+        Constants.CATEGORIES_PAGE_ROUTE: (context) => AddCategoryPage()
+      },
     );
   }
 }
@@ -43,7 +50,9 @@ class _MainState extends State<Main>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: const WalletAppBar(title: Constants.APP_NAME),
+      // create a side menu using Drawer widget
+      drawer: const SideBar(),
       body: CostBreakdown(filter: filter),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToAddExpenseRoute(context),
