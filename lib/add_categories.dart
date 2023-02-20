@@ -30,6 +30,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
       ]),
       drawer: const SideBar(),
       body: ListView.builder(
+          padding: EdgeInsets.zero,
           itemCount: _categories.length,
           itemBuilder: (context, index) {
             return Card(
