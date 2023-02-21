@@ -6,6 +6,7 @@ import 'package:wall_et_al/wallet_app_bar.dart';
 
 import 'add_expense.dart';
 import 'cost_breakdown.dart';
+import 'filter_bar.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,6 +37,7 @@ class Main extends StatefulWidget {
 }
 class _MainState extends State<Main>{
 
+  bool _expandedBottomBar = false;
   String filter = '';
   List<Widget>? _actions;
 
@@ -44,6 +46,14 @@ class _MainState extends State<Main>{
       _actions = actions;
     });
   }
+
+  void _toggleExpansion() {
+    setState(() {
+      _expandedBottomBar = !_expandedBottomBar;
+    });
+  }
+
+  bool _getExpansionState() => _expandedBottomBar;
 
   void _navigateToAddExpenseRoute(BuildContext context) {
     Navigator.push(
@@ -60,12 +70,25 @@ class _MainState extends State<Main>{
       appBar: WalletAppBar(title: Constants.APP_NAME, actions: _actions),
       // create a side menu using Drawer widget
       drawer: const SideBar(),
-      body: CostBreakdown(filter: filter, updateAppBar: _updateAppBar),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToAddExpenseRoute(context),
-        backgroundColor: Colors.lightBlue,
-        tooltip: 'Add new expense',
-        child: const Icon(Icons.add),
+      body: Stack(children: [
+        GestureDetector(
+          onPanDown: (_) {
+            if (_expandedBottomBar) {
+              _toggleExpansion();
+            }
+          },
+          child: CostBreakdown(filter: filter, updateAppBar: _updateAppBar),
+        ),
+        Align(alignment: Alignment.bottomCenter, child: FilterBar(onExpand: _toggleExpansion, getExpansionState: _getExpansionState)),
+      ]),
+      floatingActionButton: _expandedBottomBar ? null : Padding(
+        padding: const EdgeInsets.only(bottom: 80),
+        child: FloatingActionButton(
+            onPressed: () => _navigateToAddExpenseRoute(context),
+            backgroundColor: Colors.lightBlue,
+            tooltip: 'Add new expense',
+            child: const Icon(Icons.add),
+          ),
       ),
     );
   }

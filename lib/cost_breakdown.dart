@@ -93,6 +93,7 @@ class _CostBreakdownState extends State<CostBreakdown>{
         if (snapshot.hasData) {
           final List<ExpenseEntry> entries = snapshot.data!;
           return ListView.builder(
+            padding: const EdgeInsets.only(bottom:150.0),
             itemCount: entries.length,
             itemBuilder: (context, idx) => _createExpenseView(context, entries[idx]),
           );
