@@ -22,14 +22,22 @@ class _CostBreakdownState extends State<CostBreakdown>{
   }
 
   ListTile _createExpenseView(BuildContext context, ExpenseEntry e) {
+    final DateTime expenseTime = DateTime.fromMillisecondsSinceEpoch(e.msSinceEpoch);
     return ListTile(
       leading: const CircleAvatar(
         child: Icon(Icons.heart_broken),
       ),
       title: Text(e.category),
       subtitle: Text(e.description),
-      trailing: Text(e.amount.toStringAsFixed(2)),
       onTap: () => _expandExpense(context, e),
+      trailing: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(e.amount.toStringAsFixed(2), style: const TextStyle(color: Colors.redAccent, fontSize: 20)),
+          Text("${expenseTime.day.toString().padLeft(2, '0')}-${expenseTime.month.toString().padLeft(2, '0')}-${expenseTime.year}", style: const TextStyle(fontSize: 14)),
+        ],
+      ),
     );
   }
 

@@ -17,7 +17,8 @@ class _AddExpenseState extends State<AddExpenseRoute> {
   late Calculator _calculator;
   late TextEditingController _descriptionController;
   late TextEditingController _categoryController;
-  int _msSinceEpoch = DateTime.now().millisecondsSinceEpoch; // TODO
+  late DateTime _displayedDate;
+  late TimeOfDay _displayedTime;
   Function? _getFinalAmount;
   String _displayedAmount = "0";
 
@@ -32,6 +33,8 @@ class _AddExpenseState extends State<AddExpenseRoute> {
     );
     _categoryController = TextEditingController(text: widget.entry?.category ?? 'None');
     _descriptionController = TextEditingController(text: widget.entry?.description);
+    _displayedDate = DateTime.fromMillisecondsSinceEpoch(widget.entry?.msSinceEpoch ?? DateTime.now().millisecondsSinceEpoch);
+    _displayedTime = TimeOfDay.fromDateTime(_displayedDate);
   }
 
   void _setDisplayedAmount(String amount) {
@@ -57,6 +60,20 @@ class _AddExpenseState extends State<AddExpenseRoute> {
     return _categoryController.value.text;
   }
 
+  int _getDisplayedDateTimeInMs() {
+    return DateTime(_displayedDate.year, _displayedDate.month, _displayedDate.day, _displayedTime.hour, _displayedTime.minute).millisecondsSinceEpoch;
+  }
+
+  ExpenseEntry _createExpense(String id, double finalAmount) {
+    return ExpenseEntry(
+      id: id,
+      amount: finalAmount,
+      msSinceEpoch: _getDisplayedDateTimeInMs(),
+      description: _getDescription(),
+      category: _getCategory(),
+    );
+  }
+
   bool _saveExpense() {
     double finalAmount = _getFinalAmount == null ? 0.0 : _getFinalAmount!();
     if (finalAmount.isNaN) {
@@ -69,13 +86,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
         // Try insert 5 times with retries
         for (int i=0; i < 5; i++) {
           String dbId = DatabaseUtils.createCryptoRandomString();
-          ExpenseEntry e = ExpenseEntry(
-            id: dbId,
-            amount: finalAmount,
-            msSinceEpoch: _msSinceEpoch,
-            description: _getDescription(),
-            category: _getCategory(),
-          );
+          ExpenseEntry e = _createExpense(dbId, finalAmount);
           int status = await ExpenseDatabase.instance.insertExpense(e);
           if (status != 0) {
             return;
@@ -89,19 +100,38 @@ class _AddExpenseState extends State<AddExpenseRoute> {
       return true;
     } else {
       ExpenseEntry oldEntry = widget.entry!;
-      ExpenseEntry newEntry = ExpenseEntry(
-        id: oldEntry.id,
-        amount: finalAmount,
-        msSinceEpoch: _msSinceEpoch,
-        description: _getDescription(),
-        category: _getCategory(),
-      );
-      if (oldEntry == newEntry) {
-        return true;
+      ExpenseEntry newEntry = _createExpense(oldEntry.id, finalAmount);
+      if (oldEntry != newEntry) {
+        ExpenseDatabase.instance.updateExpense(newEntry);
       }
-      ExpenseDatabase.instance.updateExpense(newEntry);
 
       return true;
+    }
+  }
+
+  Future<void> _handleDatePicker() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _displayedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null && picked != _displayedDate) {
+      setState(() {
+        _displayedDate = picked;
+      });
+    }
+  }
+
+  Future<void> _handleTimePicker() async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: _displayedTime,
+    );
+    if (picked != null && picked != _displayedTime) {
+      setState(() {
+        _displayedTime = picked;
+      });
     }
   }
 
@@ -121,7 +151,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
           ),
           Positioned(
             left: 0,
-            bottom: 100,
+            bottom: 80,
             child: SizedBox(
               width: 150,
               child: TextFormField(
@@ -136,21 +166,31 @@ class _AddExpenseState extends State<AddExpenseRoute> {
             ),
           ),
           Positioned(
-            right: 0,
-            bottom: 100,
+            right: 90,
+            bottom: 80,
             child: InkWell(
-              onTap: () => showDatePicker(
-                context: context,
-                initialDate: DateTime.now(),
-                firstDate: DateTime(2000),
-                lastDate: DateTime(2100),
-              ),
+              onTap: _handleDatePicker,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
-                children: const [
-                  Icon(Icons.calendar_today),
-                  SizedBox(width: 8),
-                  Text('Select Date'),
+                children: [
+                  const Icon(Icons.calendar_today),
+                  const SizedBox(width: 8),
+                  Text('${_displayedDate.day.toString().padLeft(2, '0')}-${_displayedDate.month.toString().padLeft(2, '0')}-${_displayedDate.year}'),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            right: 0,
+            bottom: 80,
+            child: InkWell(
+              onTap: _handleTimePicker,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.timelapse),
+                  const SizedBox(width: 8),
+                  Text('${_displayedTime.hour}:${_displayedTime.minute}'),
                 ],
               ),
             ),
