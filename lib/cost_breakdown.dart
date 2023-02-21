@@ -5,14 +5,17 @@ import 'database.dart';
 
 class CostBreakdown extends StatefulWidget {
   final String filter;
+  final Function updateAppBar;
 
-  const CostBreakdown({super.key, required this.filter});
+  const CostBreakdown({super.key, required this.filter, required this.updateAppBar});
 
   @override
   State<CostBreakdown> createState() => _CostBreakdownState();
 }
 
 class _CostBreakdownState extends State<CostBreakdown>{
+  String? _filter;
+  Future<List<ExpenseEntry>>? _expenses;
 
   void _expandExpense(BuildContext context, ExpenseEntry e) {
     Navigator.push(
@@ -42,13 +45,39 @@ class _CostBreakdownState extends State<CostBreakdown>{
   }
 
   Future<List<ExpenseEntry>> _getExpenses() {
-    return ExpenseDatabase.instance.getExpenses(widget.filter);
+    if (widget.filter == _filter && _expenses != null) {
+      return _expenses!;
+    }
+    _filter = widget.filter;
+    _expenses = ExpenseDatabase.instance.getExpenses(widget.filter);
+    return _expenses!;
+  }
+
+  Future<double> _getTotalExpense() async {
+    final List<ExpenseEntry> entries = await _getExpenses();
+    double amount = 0;
+    for (ExpenseEntry e in entries) {
+      amount += e.amount;
+    }
+    return amount;
   }
 
   @override
   void initState() {
     super.initState();
     _getExpenses();
+    _getTotalExpense().then((totalAmount) => widget.updateAppBar([
+      Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Container(
+              padding: const EdgeInsets.only(right: 15.0, bottom: 5.0),
+              child: Text(totalAmount.toStringAsFixed(2), style: const TextStyle(fontSize: 13)),
+          ),
+        ],
+      ),
+    ]));
   }
 
   @override

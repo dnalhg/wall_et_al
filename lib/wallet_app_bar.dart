@@ -1,18 +1,24 @@
-
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 
-class WalletAppBar extends StatelessWidget implements PreferredSizeWidget {
+class WalletAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String title;
   final List<Widget>? actions;
   const WalletAppBar({super.key, required this.title, this.actions});
 
   @override
+  Size get preferredSize => Size.fromHeight(kToolbarHeight);
+
+  @override
+  State<StatefulWidget> createState() => _WalletAppBarState();
+}
+
+class _WalletAppBarState extends State<WalletAppBar> {
+  @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: Text(title),
+      title: Text(widget.title),
       // add a side menu button to the app bar
       leading: Builder(
         builder: (BuildContext context) {
@@ -24,10 +30,7 @@ class WalletAppBar extends StatelessWidget implements PreferredSizeWidget {
           );
         },
       ),
-      actions: actions,
+      actions: widget.actions,
     );
   }
-
-  @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight);
 }

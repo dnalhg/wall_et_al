@@ -37,6 +37,13 @@ class Main extends StatefulWidget {
 class _MainState extends State<Main>{
 
   String filter = '';
+  List<Widget>? _actions;
+
+  void _updateAppBar(List<Widget> actions) {
+    setState(() {
+      _actions = actions;
+    });
+  }
 
   void _navigateToAddExpenseRoute(BuildContext context) {
     Navigator.push(
@@ -50,10 +57,10 @@ class _MainState extends State<Main>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const WalletAppBar(title: Constants.APP_NAME),
+      appBar: WalletAppBar(title: Constants.APP_NAME, actions: _actions),
       // create a side menu using Drawer widget
       drawer: const SideBar(),
-      body: CostBreakdown(filter: filter),
+      body: CostBreakdown(filter: filter, updateAppBar: _updateAppBar),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToAddExpenseRoute(context),
         backgroundColor: Colors.lightBlue,
