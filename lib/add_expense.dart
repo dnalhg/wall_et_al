@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wall_et_al/categories_dropdown.dart';
 
 import 'calculator.dart';
 import 'database.dart';
@@ -16,7 +17,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
 
   late Calculator _calculator;
   late TextEditingController _descriptionController;
-  late TextEditingController _categoryController;
+  late int? _categoryId;
   late DateTime _displayedDate;
   late TimeOfDay _displayedTime;
   Function? _getFinalAmount;
@@ -31,7 +32,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
       getFinalAmountCallback: (Function callback) => _getFinalAmount = callback,
       entry: widget.entry,
     );
-    _categoryController = TextEditingController(text: widget.entry?.category ?? 'None');
+    _categoryId = widget.entry?.categoryId;
     _descriptionController = TextEditingController(text: widget.entry?.description);
     _displayedDate = DateTime.fromMillisecondsSinceEpoch(widget.entry?.msSinceEpoch ?? DateTime.now().millisecondsSinceEpoch);
     _displayedTime = TimeOfDay.fromDateTime(_displayedDate);
@@ -56,9 +57,6 @@ class _AddExpenseState extends State<AddExpenseRoute> {
     return _descriptionController.value.text;
   }
 
-  String _getCategory() {
-    return _categoryController.value.text;
-  }
 
   int _getDisplayedDateTimeInMs() {
     return DateTime(_displayedDate.year, _displayedDate.month, _displayedDate.day, _displayedTime.hour, _displayedTime.minute).millisecondsSinceEpoch;
@@ -70,7 +68,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
       amount: finalAmount,
       msSinceEpoch: _getDisplayedDateTimeInMs(),
       description: _getDescription(),
-      category: _getCategory(),
+      categoryId: _categoryId!,
     );
   }
 
@@ -154,15 +152,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
             bottom: 80,
             child: SizedBox(
               width: 150,
-              child: TextFormField(
-                maxLines: 1,
-                decoration: const InputDecoration(
-                  labelText: 'Category',
-                  floatingLabelStyle: TextStyle(color: Colors.white),
-                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white))
-                ),
-                controller: _categoryController,
-              ),
+              child: CategoriesDropDown(categoryId: _categoryId)
             ),
           ),
           Positioned(
