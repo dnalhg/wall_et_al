@@ -16,6 +16,7 @@ class CostBreakdown extends StatefulWidget {
 class _CostBreakdownState extends State<CostBreakdown>{
   String? _filter;
   Future<List<ExpenseEntry>>? _expenses;
+  late List<CategoryEntry> _categories;
 
   void _expandExpense(BuildContext context, ExpenseEntry e) {
     Navigator.push(
@@ -30,7 +31,7 @@ class _CostBreakdownState extends State<CostBreakdown>{
       leading: const CircleAvatar(
         child: Icon(Icons.heart_broken),
       ),
-      title: Text(e.category),
+      title: Text(_categories.firstWhere((element) => element.id == e.categoryId).name),
       subtitle: Text(e.description),
       onTap: () => _expandExpense(context, e),
       trailing: Column(
@@ -87,11 +88,12 @@ class _CostBreakdownState extends State<CostBreakdown>{
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<ExpenseEntry>>(
-      future: _getExpenses(),
+    return FutureBuilder(
+      future: Future.wait([_getExpenses(), ExpenseDatabase.instance.getCategories()]),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          final List<ExpenseEntry> entries = snapshot.data!;
+          final List<ExpenseEntry> entries = snapshot.data![0] as List<ExpenseEntry>;
+          _categories = snapshot.data![1] as List<CategoryEntry>;
           return ListView.builder(
             itemCount: entries.length,
             itemBuilder: (context, idx) => _createExpenseView(context, entries[idx]),
