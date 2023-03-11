@@ -133,6 +133,11 @@ class _AddExpenseState extends State<AddExpenseRoute> {
     }
   }
 
+  static String _twoDigits(int n) {
+    if (n >= 10) return "$n";
+    return "0$n";
+  }
+
   Widget _currentAmountDisplay() {
     return Container(
       decoration: const BoxDecoration(color: Colors.lightBlue),
@@ -169,7 +174,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
                 children: [
                   const Icon(Icons.calendar_today),
                   const SizedBox(width: 8),
-                  Text('${_displayedDate.day.toString().padLeft(2, '0')}-${_displayedDate.month.toString().padLeft(2, '0')}-${_displayedDate.year}'),
+                  Text('${_twoDigits(_displayedDate.day)}-${_twoDigits(_displayedDate.month)}-${_displayedDate.year}'),
                 ],
               ),
             ),
@@ -184,7 +189,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
                 children: [
                   const Icon(Icons.timelapse),
                   const SizedBox(width: 8),
-                  Text('${_displayedTime.hour}:${_displayedTime.minute}'),
+                  Text('${_twoDigits(_displayedTime.hour)}:${_twoDigits(_displayedTime.minute)}'),
                 ],
               ),
             ),
