@@ -152,7 +152,11 @@ class _AddExpenseState extends State<AddExpenseRoute> {
             bottom: 80,
             child: SizedBox(
               width: 150,
-              child: CategoriesDropDown(categoryId: _categoryId)
+              child: CategoriesDropDown(categoryId: _categoryId, onCategorySelection: (int? newCategoryId) {
+                setState(() {
+                  _categoryId = newCategoryId;
+                });
+              })
             ),
           ),
           Positioned(

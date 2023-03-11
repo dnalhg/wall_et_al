@@ -14,7 +14,6 @@ class CostBreakdown extends StatefulWidget {
 }
 
 class _CostBreakdownState extends State<CostBreakdown>{
-  String? _filter;
   Future<List<ExpenseEntry>>? _expenses;
   late List<CategoryEntry> _categories;
 
@@ -46,10 +45,6 @@ class _CostBreakdownState extends State<CostBreakdown>{
   }
 
   Future<List<ExpenseEntry>> _getExpenses() {
-    if (widget.filter == _filter && _expenses != null) {
-      return _expenses!;
-    }
-    _filter = widget.filter;
     _expenses = ExpenseDatabase.instance.getExpenses(widget.filter);
     return _expenses!;
   }

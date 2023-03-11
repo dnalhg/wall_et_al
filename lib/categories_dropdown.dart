@@ -3,8 +3,9 @@ import 'package:wall_et_al/database.dart';
 
 class CategoriesDropDown extends StatefulWidget {
   final int? categoryId;
+  final Function onCategorySelection;
 
-  const CategoriesDropDown({super.key, this.categoryId});
+  const CategoriesDropDown({super.key, this.categoryId, required this.onCategorySelection});
 
   @override
   _CategoriesDropDownState createState() => _CategoriesDropDownState();
@@ -42,10 +43,8 @@ class _CategoriesDropDownState extends State<CategoriesDropDown> {
                   child: Text(category.name),
                 );
               }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  // use the parent to do some stuff here
-                });
+              onChanged: (int? categoryId) {
+                widget.onCategorySelection(categoryId);
               },
               decoration: const InputDecoration(
                 labelText: 'Select a category',
