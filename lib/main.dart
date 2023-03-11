@@ -38,6 +38,7 @@ class Main extends StatefulWidget {
 class _MainState extends State<Main>{
 
   bool _expandedBottomBar = false;
+  bool _forceUpdate = true;
   String filter = '';
   List<Widget>? _actions;
 
@@ -60,7 +61,7 @@ class _MainState extends State<Main>{
       context,
       MaterialPageRoute(builder: (context) => const AddExpenseRoute()),
     ).then((val) => setState(() {
-        filter = filter;
+        _forceUpdate = true;
       }));
   }
 
@@ -77,7 +78,13 @@ class _MainState extends State<Main>{
               _toggleExpansion();
             }
           },
-          child: CostBreakdown(filter: filter, updateAppBar: _updateAppBar),
+          child: CostBreakdown(
+              forceUpdate: _forceUpdate,
+              onUpdate: () {
+                _forceUpdate = false;
+              },
+              updateAppBar: _updateAppBar
+          ),
         ),
         Align(alignment: Alignment.bottomCenter, child: FilterBar(onExpand: _toggleExpansion, getExpansionState: _getExpansionState)),
       ]),

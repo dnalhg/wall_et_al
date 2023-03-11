@@ -4,10 +4,11 @@ import 'add_expense.dart';
 import 'database.dart';
 
 class CostBreakdown extends StatefulWidget {
-  final String filter;
+  final bool forceUpdate;
+  final Function onUpdate;
   final Function updateAppBar;
 
-  const CostBreakdown({super.key, required this.filter, required this.updateAppBar});
+  const CostBreakdown({super.key, required this.forceUpdate, required this.onUpdate, required this.updateAppBar});
 
   @override
   State<CostBreakdown> createState() => _CostBreakdownState();
@@ -21,7 +22,9 @@ class _CostBreakdownState extends State<CostBreakdown>{
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => AddExpenseRoute(entry: e)),
-    ).then((_) => setState(() {}));
+    ).then((_) => setState(() {
+      _getExpenses(forceUpdate: true);
+    }));
   }
 
   ListTile _createExpenseView(BuildContext context, ExpenseEntry e) {
@@ -44,36 +47,39 @@ class _CostBreakdownState extends State<CostBreakdown>{
     );
   }
 
-  Future<List<ExpenseEntry>> _getExpenses() {
-    _expenses = ExpenseDatabase.instance.getExpenses(widget.filter);
+  Future<List<ExpenseEntry>> _getExpenses({bool? forceUpdate}) {
+    if (widget.forceUpdate || forceUpdate == true) {
+      _expenses = ExpenseDatabase.instance.getExpenses();
+      _getTotalExpense(_expenses!);
+      widget.onUpdate();
+    }
     return _expenses!;
   }
 
-  Future<double> _getTotalExpense() async {
-    final List<ExpenseEntry> entries = await _getExpenses();
+  Future<void> _getTotalExpense(Future<List<ExpenseEntry>> entries) async {
     double amount = 0;
-    for (ExpenseEntry e in entries) {
+    for (ExpenseEntry e in await entries) {
       amount += e.amount;
     }
-    return amount;
+
+    widget.updateAppBar([
+      Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Container(
+            padding: const EdgeInsets.only(right: 15.0, bottom: 5.0),
+            child: Text(amount.toStringAsFixed(2), style: const TextStyle(fontSize: 13)),
+          ),
+        ],
+      ),
+    ]);
   }
 
   @override
   void initState() {
     super.initState();
     _getExpenses();
-    _getTotalExpense().then((totalAmount) => widget.updateAppBar([
-      Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Container(
-              padding: const EdgeInsets.only(right: 15.0, bottom: 5.0),
-              child: Text(totalAmount.toStringAsFixed(2), style: const TextStyle(fontSize: 13)),
-          ),
-        ],
-      ),
-    ]));
   }
 
   @override

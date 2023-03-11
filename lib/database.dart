@@ -81,7 +81,7 @@ class ExpenseDatabase {
         _expenseTableName, where: 'id = ?', whereArgs: [e.id]);
   }
 
-  Future<List<ExpenseEntry>> getExpenses(String filter) async {
+  Future<List<ExpenseEntry>> getExpenses({String? filter}) async {
     final db = await _database;
     return (await db.query(_expenseTableName)).map((m) =>
         ExpenseEntry.fromMap(m)).toList();
