@@ -50,7 +50,7 @@ class ExpenseDatabase {
             )
             '''
         );
-        final nullCategory = CategoryEntry(name: "N/A", icon: Icons.do_disturb_alt_sharp, color: Colors.red);
+        final nullCategory = CategoryEntry(name: "None", icon: Icons.do_disturb_alt_sharp, color: Colors.red);
         await db.insert(_categoriesTableName, nullCategory.toMap());
       },
       version: 1,
