@@ -39,12 +39,19 @@ class _MainState extends State<Main>{
 
   bool _expandedBottomBar = false;
   bool _forceUpdate = true;
-  String filter = '';
+  String _timeFilter = FilterBar.getDefaultTimeFilterString();
   List<Widget>? _actions;
 
   void _updateAppBar(List<Widget> actions) {
     setState(() {
       _actions = actions;
+    });
+  }
+
+  void _updateTimeFilter(String timeFilter) {
+    setState(() {
+      _timeFilter = timeFilter;
+      _forceUpdate = true;
     });
   }
 
@@ -79,6 +86,7 @@ class _MainState extends State<Main>{
             }
           },
           child: CostBreakdown(
+              timeFilter: _timeFilter,
               forceUpdate: _forceUpdate,
               onUpdate: () {
                 _forceUpdate = false;
@@ -86,7 +94,7 @@ class _MainState extends State<Main>{
               updateAppBar: _updateAppBar
           ),
         ),
-        Align(alignment: Alignment.bottomCenter, child: FilterBar(onExpand: _toggleExpansion, getExpansionState: _getExpansionState)),
+        Align(alignment: Alignment.bottomCenter, child: FilterBar(onExpand: _toggleExpansion, getExpansionState: _getExpansionState, updateTimeFilter: _updateTimeFilter)),
       ]),
       floatingActionButton: _expandedBottomBar ? null : Padding(
         padding: const EdgeInsets.only(bottom: 80),

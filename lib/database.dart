@@ -81,10 +81,22 @@ class ExpenseDatabase {
         _expenseTableName, where: 'id = ?', whereArgs: [e.id]);
   }
 
-  Future<List<ExpenseEntry>> getExpenses({String? filter}) async {
+  /// [timeFilter] is a string of the format 'startTime-endTime' where startTime
+  /// is inclusive and endTime is exclusive
+  Future<List<ExpenseEntry>> getExpenses({String? timeFilter}) async {
+    if (timeFilter == null) return [];
     final db = await _database;
-    return (await db.query(_expenseTableName)).map((m) =>
-        ExpenseEntry.fromMap(m)).toList();
+    List<String> timeRange = timeFilter.split('-');
+    String startTime = timeRange.first;
+    String endTime = timeRange.last;
+    Future<List<Map<String, Object?>>> queryResult = db.query(
+        _expenseTableName,
+        where: 'ms_since_epoch >= ? AND ms_since_epoch < ?',
+        whereArgs: [startTime, endTime],
+    );
+    List<ExpenseEntry> expenses = (await queryResult).map((m) => ExpenseEntry.fromMap(m)).toList();
+    expenses.sort((e1, e2) => e1.msSinceEpoch.compareTo(e2.msSinceEpoch) * -1);
+    return expenses;
   }
 
   Future<int> addCategory(CategoryEntry e) async {

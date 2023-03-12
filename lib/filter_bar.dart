@@ -4,11 +4,21 @@ import 'package:flutter/material.dart';
 class FilterBar extends StatefulWidget {
   final Function onExpand;
   final Function getExpansionState;
+  final Function updateTimeFilter;
 
-  const FilterBar({super.key, required this.onExpand, required this.getExpansionState});
+  const FilterBar({super.key, required this.onExpand, required this.getExpansionState, required this.updateTimeFilter});
 
   @override
   State<StatefulWidget> createState() => _FilterBarState();
+
+  static String getDefaultTimeFilterString() {
+    DateTime currentTimePeriod = DateTime.now();
+    int startTime = DateTime(currentTimePeriod.year, currentTimePeriod.month, 1).millisecondsSinceEpoch;
+    int endYear = currentTimePeriod.year + currentTimePeriod.month == 12 ? 1 : 0;
+    int endMonth = currentTimePeriod.month == 12 ? 1 : currentTimePeriod.month + 1;
+    int endTime = DateTime(endYear, endMonth, 1).millisecondsSinceEpoch;
+    return "$startTime-$endTime";
+  }
 
 }
 
@@ -36,23 +46,54 @@ Map<int, String> _MONTH_TO_STRING = {
 class _FilterBarState extends State<FilterBar> {
   final Duration _animationTime = const Duration(milliseconds: 500);
 
+  _TimeFilterGranularity _selectedTimeGranularity = _TimeFilterGranularity.Month;
+  DateTime _currentTimePeriod = DateTime.now();
+
   final List<_TimeFilterGranularity> _menuItems = [
     _TimeFilterGranularity.Week,
     _TimeFilterGranularity.Month,
     _TimeFilterGranularity.Year,
   ];
 
-  _TimeFilterGranularity _selectedTimeGranularity = _TimeFilterGranularity.Month;
-  DateTime _currentTimePeriod = DateTime.now();
+  String _getCurrentTimePeriodAsFilterString() {
+    int startTime;
+    int endTime;
+    switch (_selectedTimeGranularity) {
+      case _TimeFilterGranularity.Week:
+        int currWeekday = _currentTimePeriod.weekday;
+        DateTime startOfCurrWeek = _currentTimePeriod.subtract(Duration(days: currWeekday - DateTime.monday));
+        DateTime startOfCurrWeekStripped = DateTime(startOfCurrWeek.year, startOfCurrWeek.month, startOfCurrWeek.day);
 
-  void _selectNewTimeGranularity(_TimeFilterGranularity granularity) {
-    setState(() {
-      _selectedTimeGranularity = granularity;
-      _currentTimePeriod = DateTime.now();
-    });
+        startTime = startOfCurrWeekStripped.millisecondsSinceEpoch;
+        endTime = startOfCurrWeekStripped.add(const Duration(days: 7)).millisecondsSinceEpoch;
+        break;
+      case _TimeFilterGranularity.Month:
+        startTime = DateTime(_currentTimePeriod.year, _currentTimePeriod.month, 1).millisecondsSinceEpoch;
+        int endYear = _currentTimePeriod.year + (_currentTimePeriod.month == 12 ? 1 : 0);
+        int endMonth = _currentTimePeriod.month == 12 ? 1 : _currentTimePeriod.month + 1;
+        endTime = DateTime(endYear, endMonth, 1).millisecondsSinceEpoch;
+        break;
+      case _TimeFilterGranularity.Year:
+        startTime = DateTime(_currentTimePeriod.year, 1, 1).millisecondsSinceEpoch;
+        endTime = DateTime(_currentTimePeriod.year + 1, 1, 1).millisecondsSinceEpoch;
+        break;
+    }
+    return "$startTime-$endTime";
   }
 
-  void _incremenetCurrentTimePeriod(bool forwards) {
+  void _updateTimePeriod(DateTime newTimePeriod, _TimeFilterGranularity newTimeGranularity) {
+    setState(() {
+      _selectedTimeGranularity = newTimeGranularity;
+      _currentTimePeriod = newTimePeriod;
+    });
+    widget.updateTimeFilter(_getCurrentTimePeriodAsFilterString());
+  }
+
+  void _selectNewTimeGranularity(_TimeFilterGranularity granularity) {
+    _updateTimePeriod(DateTime.now(), granularity);
+  }
+
+  void _incrementCurrentTimePeriod(bool forwards) {
     DateTime newTimePeriod;
     int offset = forwards ? 1 : -1;
     switch (_selectedTimeGranularity) {
@@ -73,9 +114,7 @@ class _FilterBarState extends State<FilterBar> {
         newTimePeriod = DateTime(_currentTimePeriod.year + offset);
         break;
     }
-    setState(() {
-      _currentTimePeriod = newTimePeriod;
-    });
+    _updateTimePeriod(newTimePeriod, _selectedTimeGranularity);
   }
 
   String _getDateString(DateTime date) {
@@ -110,8 +149,6 @@ class _FilterBarState extends State<FilterBar> {
     }
   }
 
-
-
   bool _isExpanded() => widget.getExpansionState();
 
   Widget _buildTimeFilter(BuildContext context) {
@@ -120,7 +157,7 @@ class _FilterBarState extends State<FilterBar> {
       children: [
         IconButton(
           icon: const Icon(Icons.chevron_left),
-          onPressed: () => _incremenetCurrentTimePeriod(false),
+          onPressed: () => _incrementCurrentTimePeriod(false),
         ),
         PopupMenuButton<_TimeFilterGranularity>(
           itemBuilder: (BuildContext context) {
@@ -142,7 +179,7 @@ class _FilterBarState extends State<FilterBar> {
         ),
         IconButton(
           icon: const Icon(Icons.chevron_right),
-          onPressed: () => _incremenetCurrentTimePeriod(true),
+          onPressed: () => _incrementCurrentTimePeriod(true),
         ),
       ],
     );

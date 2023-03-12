@@ -5,10 +5,11 @@ import 'database.dart';
 
 class CostBreakdown extends StatefulWidget {
   final bool forceUpdate;
+  final String? timeFilter;
   final Function onUpdate;
   final Function updateAppBar;
 
-  const CostBreakdown({super.key, required this.forceUpdate, required this.onUpdate, required this.updateAppBar});
+  const CostBreakdown({super.key, required this.forceUpdate, required this.timeFilter, required this.onUpdate, required this.updateAppBar});
 
   @override
   State<CostBreakdown> createState() => _CostBreakdownState();
@@ -49,7 +50,7 @@ class _CostBreakdownState extends State<CostBreakdown>{
 
   Future<List<ExpenseEntry>> _getExpenses({bool? forceUpdate}) {
     if (widget.forceUpdate || forceUpdate == true) {
-      _expenses = ExpenseDatabase.instance.getExpenses();
+      _expenses = ExpenseDatabase.instance.getExpenses(timeFilter: widget.timeFilter);
       _getTotalExpense(_expenses!);
       widget.onUpdate();
     }
