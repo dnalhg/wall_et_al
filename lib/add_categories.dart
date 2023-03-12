@@ -7,16 +7,16 @@ import 'package:wall_et_al/wallet_app_bar.dart';
 
 
 class AddCategoryPage extends StatefulWidget {
-  final bool isChoosing;
+  final Future<CategoryEntry>? chosen;
 
-  const AddCategoryPage({super.key, required this.isChoosing});
+  AddCategoryPage({super.key, this.chosen});
 
   @override
   State<AddCategoryPage> createState() => _AddCategoryPageState();
 }
 
 class _AddCategoryPageState extends State<AddCategoryPage> {
-  Future<List<CategoryEntry>>? _categoriesFuture;
+  late Future<List<CategoryEntry>> _categoriesFuture;
   bool _isEditing = false;
 
   @override
@@ -37,7 +37,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
       _openAddListItemModal((name, color, icon) {
         _updateCategory(CategoryEntry(name: name, icon: icon, color: color, id: entry.id));
       }, entry);
-    } else if (widget.isChoosing) {
+    } else if (widget.chosen != null) {
       Navigator.of(context).pop(entry);
     }
     return;
@@ -67,25 +67,29 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
           icon: Icon(_isEditing ? Icons.check : Icons.edit),
           onPressed: _handleEditPress,
         ),
-      ], showMenuButton: !widget.isChoosing),
+      ], showMenuButton: widget.chosen == null),
       drawer: const SideBar(),
-      body: FutureBuilder<List<CategoryEntry>>(
-        future: _categoriesFuture,
+      body: FutureBuilder<List<dynamic>>(
+        future: Future.wait([_categoriesFuture, widget.chosen ?? Future.value(null)]),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            final List<CategoryEntry> categories = snapshot.data!;
+            final List<CategoryEntry> categories = snapshot.data![0];
+            final CategoryEntry? chosen = snapshot.data![1];
 
             return ListView.builder(
               padding: EdgeInsets.zero,
               itemCount: categories.length,
               itemBuilder: (context, index) {
+                CategoryEntry entry = categories[index];
                 return Card(
+                  shape: chosen?.id == entry.id ? RoundedRectangleBorder(side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 4)) : null,
+
                   child: ListTile(
-                    tileColor: categories[index].color,
-                    leading: Icon(categories[index].icon),
-                    title: Text(categories[index].name),
-                    trailing: _buildCategoryDeletionButton(categories[index]),
-                    onTap: _isEditing || widget.isChoosing ? () => _handleTileTap(context, categories[index]) : null,
+                    tileColor: entry.color,
+                    leading: Icon(entry.icon),
+                    title: Text(entry.name),
+                    trailing: _buildCategoryDeletionButton(entry),
+                    onTap: _isEditing || widget.chosen != null ? () => _handleTileTap(context, entry) : null,
                   ),
                 );
               },

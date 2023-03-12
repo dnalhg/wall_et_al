@@ -111,7 +111,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
   void _handleCategoryPicker(BuildContext context) {
     Navigator.push<CategoryEntry>(
       context,
-      MaterialPageRoute(builder: (context) => const AddCategoryPage(isChoosing: true)),
+      MaterialPageRoute(builder: (context) => AddCategoryPage(chosen: _category)),
     ).then((CategoryEntry? entry) {
       setState(() {
         _category = Future.value(entry ?? ExpenseDatabase.nullCategory);
