@@ -226,15 +226,16 @@ class CalculatorButton extends StatelessWidget {
   final String value;
   final Function onPressed;
 
-  static final Map<String, Widget> _valueToIcon = ({for (int i in [for (int i = 0; i <= 9; i++) i]) i.toString() : Text(i.toString(), style: const TextStyle(fontSize: 30)) })
+  static final Map<String, Widget> _valueToIcon = ({for (int i in [for (int i = 0; i <= 9; i++) i])
+    i.toString() : Text(i.toString(), style: const TextStyle(fontSize: 30, color: Colors.white54)) })
     ..addAll({
-      '.' : const Text('.', style: TextStyle(fontSize: 30)),
-      _CalculatorOperations.delete.name: const Icon(Icons.backspace, size: 18),
-      _CalculatorOperations.divide.name: const Icon(CustomIcons.divide, size: 18),
-      _CalculatorOperations.multiply.name: const Icon(Icons.close_sharp),
-      _CalculatorOperations.subtract.name: const Icon(Icons.remove),
-      _CalculatorOperations.plus.name: const Icon(Icons.add),
-      _CalculatorOperations.equals.name: const Icon(CustomIcons.equals, size: 18),
+      '.' : const Text('.', style: TextStyle(fontSize: 30, color: Colors.white54)),
+      _CalculatorOperations.delete.name: const Icon(Icons.backspace, size: 18, color: Colors.white60),
+      _CalculatorOperations.divide.name: const Icon(CustomIcons.divide, size: 18, color: Colors.white54),
+      _CalculatorOperations.multiply.name: const Icon(Icons.close_sharp, color: Colors.white54),
+      _CalculatorOperations.subtract.name: const Icon(Icons.remove, color: Colors.white54),
+      _CalculatorOperations.plus.name: const Icon(Icons.add, color: Colors.white54),
+      _CalculatorOperations.equals.name: const Icon(CustomIcons.equals, size: 18, color: Colors.white54),
     });
 
   const CalculatorButton({super.key, required this.value, required this.onPressed});
@@ -247,7 +248,8 @@ class CalculatorButton extends StatelessWidget {
           onPressed(value);
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: _CalculatorOperationsExt.isArithmeticOperation(value) && value != _CalculatorOperations.delete.name ? Colors.grey : Colors.black12,
+          backgroundColor: _CalculatorOperationsExt.isArithmeticOperation(value) && value != _CalculatorOperations.delete.name ?
+            Theme.of(context).colorScheme.background : Colors.black12,
           shape: const BeveledRectangleBorder(side: BorderSide.none),
         ),
         child: _valueToIcon[value],

@@ -174,7 +174,7 @@ class _FilterBarState extends State<FilterBar> {
             alignment: Alignment.center,
             width: 200,
             height: 50,
-            child: Text(_getDisplayedTimePeriod(), style: TextStyle(fontSize: 18, color: Theme.of(context).colorScheme.onPrimary)),
+            child: Text(_getDisplayedTimePeriod(), style: TextStyle(fontSize: 18, color: Theme.of(context).colorScheme.onSurface)),
           )
         ),
         IconButton(

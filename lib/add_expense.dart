@@ -169,9 +169,9 @@ class _AddExpenseState extends State<AddExpenseRoute> {
                 }
               ).name;
           }
-          return Text(text, style: TextStyle(color: Theme.of(context).colorScheme.onSecondary, fontSize: 17));
+          return Text(text, style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 17));
         } else {
-          return Text('', style: TextStyle(color: Theme.of(context).colorScheme.onSecondary, fontSize: 17));
+          return Text('', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 17));
         }
       }
     );
@@ -179,7 +179,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
 
   Widget _currentAmountDisplay(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(color: Theme.of(context).colorScheme.onPrimary),
+      decoration: BoxDecoration(color: Theme.of(context).colorScheme.primaryContainer),
       padding: const EdgeInsets.all(16),
       child: Stack(
         children: [
@@ -189,7 +189,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
             child: FittedBox(
               fit: BoxFit.fitWidth,
               child: Text(_displayedAmount, style: TextStyle(
-                color: Theme.of(context).colorScheme.onSecondary,
+                color: Theme.of(context).colorScheme.onPrimary,
                 fontSize: 58,
                 fontWeight: FontWeight.bold),
               ),
@@ -208,7 +208,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
                   children: [
                     Text(
                       'Category',
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSecondary, fontSize: 14),
+                      style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 14),
                     ),
                     _getCategoryName(context),
                   ],
@@ -224,11 +224,11 @@ class _AddExpenseState extends State<AddExpenseRoute> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.calendar_today, color: Theme.of(context).colorScheme.onSecondary),
+                  Icon(Icons.calendar_today, color: Theme.of(context).colorScheme.onPrimary),
                   const SizedBox(width: 8),
                   Text(
                     '${_twoDigits(_displayedDate.day)}-${_twoDigits(_displayedDate.month)}-${_displayedDate.year}',
-                    style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+                    style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
                   ),
                 ],
               ),
@@ -242,11 +242,11 @@ class _AddExpenseState extends State<AddExpenseRoute> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.timelapse, color: Theme.of(context).colorScheme.onSecondary),
+                  Icon(Icons.timelapse, color: Theme.of(context).colorScheme.onPrimary),
                   const SizedBox(width: 8),
                   Text(
                     '${_twoDigits(_displayedTime.hour)}:${_twoDigits(_displayedTime.minute)}',
-                    style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+                    style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
                   ),
                 ],
               ),
@@ -261,12 +261,12 @@ class _AddExpenseState extends State<AddExpenseRoute> {
               showCursor: false,
               decoration: InputDecoration(
                 labelText: 'Description',
-                floatingLabelStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary, fontSize: 19),
-                labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary, fontSize: 17),
+                floatingLabelStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 19),
+                labelStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 17),
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
               ),
-              style: TextStyle(color: Theme.of(context).colorScheme.onSecondary, fontSize: 17),
+              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 17),
               controller: _descriptionController,
             ),
           ),
