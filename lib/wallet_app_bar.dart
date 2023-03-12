@@ -5,7 +5,10 @@ import 'package:flutter/material.dart';
 class WalletAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String title;
   final List<Widget>? actions;
-  const WalletAppBar({super.key, required this.title, this.actions});
+  late final bool showMenuButton;
+  WalletAppBar({super.key, required this.title, this.actions, bool? showMenuButton}) {
+    this.showMenuButton = showMenuButton ?? true;
+  }
 
   @override
   Size get preferredSize => Size.fromHeight(kToolbarHeight);
@@ -20,16 +23,13 @@ class _WalletAppBarState extends State<WalletAppBar> {
     return AppBar(
       title: Text(widget.title),
       // add a side menu button to the app bar
-      leading: Builder(
-        builder: (BuildContext context) {
-          return IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
-          );
-        },
-      ),
+      automaticallyImplyLeading: false,
+      leading: widget.showMenuButton ? IconButton(
+          icon: const Icon(Icons.menu),
+          onPressed: () {
+            Scaffold.of(context).openDrawer();
+          },
+        ) : null,
       actions: widget.actions,
     );
   }

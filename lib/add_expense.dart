@@ -149,9 +149,19 @@ class _AddExpenseState extends State<AddExpenseRoute> {
     return "0$n";
   }
 
+  int? _previousCategoryId;
+  Future<List<CategoryEntry>>? _categories;
+  Future<List<CategoryEntry>> _getCategories() {
+    if (_categories == null || _previousCategoryId == null || _previousCategoryId != _categoryId) {
+      _previousCategoryId = _categoryId;
+      _categories = ExpenseDatabase.instance.getCategories();
+    }
+    return _categories!;
+  }
+
   Widget _getCategoryName(BuildContext context) {
     return FutureBuilder(
-      future: ExpenseDatabase.instance.getCategories(),
+      future: _getCategories(),
       builder: (BuildContext context, AsyncSnapshot<List<CategoryEntry>> snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           String text;

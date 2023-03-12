@@ -67,7 +67,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
           icon: Icon(_isEditing ? Icons.check : Icons.edit),
           onPressed: _handleEditPress,
         ),
-      ]),
+      ], showMenuButton: !widget.isChoosing),
       drawer: const SideBar(),
       body: FutureBuilder<List<CategoryEntry>>(
         future: _categoriesFuture,
