@@ -30,18 +30,23 @@ class _CostBreakdownState extends State<CostBreakdown>{
 
   ListTile _createExpenseView(BuildContext context, ExpenseEntry e) {
     final DateTime expenseTime = DateTime.fromMillisecondsSinceEpoch(e.msSinceEpoch);
+    CategoryEntry category = _categories.firstWhere(
+        (CategoryEntry cat) => cat.id == e.categoryId,
+        orElse: () => ExpenseDatabase.nullCategory,
+    );
     return ListTile(
-      leading: const CircleAvatar(
-        child: Icon(Icons.heart_broken),
+      leading: CircleAvatar(
+        backgroundColor: category.color,
+        child: Icon(category.icon, color: Theme.of(context).colorScheme.onPrimary),
       ),
-      title: Text(_categories.firstWhere((element) => element.id == e.categoryId).name),
+      title: Text(category.name, style: const TextStyle(fontSize: 18)),
       subtitle: Text(e.description),
       onTap: () => _expandExpense(context, e),
       trailing: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Text(e.amount.toStringAsFixed(2), style: const TextStyle(color: Colors.redAccent, fontSize: 20)),
+          Text(e.amount.toStringAsFixed(2), style: const TextStyle(color: Colors.redAccent, fontSize: 18)),
           Text("${expenseTime.day.toString().padLeft(2, '0')}-${expenseTime.month.toString().padLeft(2, '0')}-${expenseTime.year}", style: const TextStyle(fontSize: 14)),
         ],
       ),

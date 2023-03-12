@@ -17,7 +17,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
 
   late Calculator _calculator;
   late TextEditingController _descriptionController;
-  late int? _categoryId;
+  late int _categoryId;
   late DateTime _displayedDate;
   late TimeOfDay _displayedTime;
   Function? _getFinalAmount;
@@ -32,7 +32,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
       getFinalAmountCallback: (Function callback) => _getFinalAmount = callback,
       entry: widget.entry,
     );
-    _categoryId = widget.entry?.categoryId;
+    _categoryId = widget.entry?.categoryId ?? 1;
     _descriptionController = TextEditingController(text: widget.entry?.description);
     _displayedDate = DateTime.fromMillisecondsSinceEpoch(widget.entry?.msSinceEpoch ?? DateTime.now().millisecondsSinceEpoch);
     _displayedTime = TimeOfDay.fromDateTime(_displayedDate);
@@ -68,7 +68,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
       amount: finalAmount,
       msSinceEpoch: _getDisplayedDateTimeInMs(),
       description: _getDescription(),
-      categoryId: _categoryId!,
+      categoryId: _categoryId,
     );
   }
 
@@ -138,9 +138,37 @@ class _AddExpenseState extends State<AddExpenseRoute> {
     return "0$n";
   }
 
-  Widget _currentAmountDisplay() {
+  Widget _getCategoryName(BuildContext context) {
+    return FutureBuilder(
+      future: ExpenseDatabase.instance.getCategories(),
+      builder: (BuildContext context, AsyncSnapshot<List<CategoryEntry>> snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          String text;
+          if (snapshot.hasError) {
+            text = 'Error: ${snapshot.error}';
+          } else if (!snapshot.hasData) {
+            text = 'Error: no data';
+          } else {
+            List<CategoryEntry> entries = snapshot.data!;
+            text = entries.firstWhere(
+                (CategoryEntry e) => e.id == _categoryId,
+                orElse: () {
+                  _categoryId = ExpenseDatabase.nullCategory.id!;
+                  return ExpenseDatabase.nullCategory;
+                }
+              ).name;
+          }
+          return Text(text, style: TextStyle(color: Theme.of(context).colorScheme.onSecondary, fontSize: 17));
+        } else {
+          return Text('', style: TextStyle(color: Theme.of(context).colorScheme.onSecondary, fontSize: 17));
+        }
+      }
+    );
+  }
+
+  Widget _currentAmountDisplay(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(color: Colors.lightBlue),
+      decoration: BoxDecoration(color: Theme.of(context).colorScheme.onPrimary),
       padding: const EdgeInsets.all(16),
       child: Stack(
         children: [
@@ -149,20 +177,41 @@ class _AddExpenseState extends State<AddExpenseRoute> {
             right: 20,
             child: FittedBox(
               fit: BoxFit.fitWidth,
-              child: Text(_displayedAmount, style: const TextStyle(fontSize: 58, fontWeight: FontWeight.bold)),
+              child: Text(_displayedAmount, style: TextStyle(
+                color: Theme.of(context).colorScheme.onSecondary,
+                fontSize: 58,
+                fontWeight: FontWeight.bold),
+              ),
             ),
           ),
           Positioned(
             left: 0,
             bottom: 80,
-            child: SizedBox(
-              width: 150,
-              child: CategoriesDropDown(categoryId: _categoryId, onCategorySelection: (int? newCategoryId) {
-                setState(() {
-                  _categoryId = newCategoryId;
-                });
-              })
+            child: InkWell(
+              onTap: _handleDatePicker,
+              child: SizedBox(
+                // height: 38,
+                width: 150,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Category',
+                      style: TextStyle(color: Theme.of(context).colorScheme.onSecondary, fontSize: 14),
+                    ),
+                    _getCategoryName(context),
+                  ],
+                ),
+              ),
             ),
+            // child: SizedBox(
+            //   width: 150,
+            //   child: CategoriesDropDown(categoryId: _categoryId, onCategorySelection: (int? newCategoryId) {
+            //     setState(() {
+            //       _categoryId = newCategoryId;
+            //     });
+            //   })
+            // ),
           ),
           Positioned(
             right: 90,
@@ -172,9 +221,12 @@ class _AddExpenseState extends State<AddExpenseRoute> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.calendar_today),
+                  Icon(Icons.calendar_today, color: Theme.of(context).colorScheme.onSecondary),
                   const SizedBox(width: 8),
-                  Text('${_twoDigits(_displayedDate.day)}-${_twoDigits(_displayedDate.month)}-${_displayedDate.year}'),
+                  Text(
+                    '${_twoDigits(_displayedDate.day)}-${_twoDigits(_displayedDate.month)}-${_displayedDate.year}',
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+                  ),
                 ],
               ),
             ),
@@ -187,9 +239,12 @@ class _AddExpenseState extends State<AddExpenseRoute> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.timelapse),
+                  Icon(Icons.timelapse, color: Theme.of(context).colorScheme.onSecondary),
                   const SizedBox(width: 8),
-                  Text('${_twoDigits(_displayedTime.hour)}:${_twoDigits(_displayedTime.minute)}'),
+                  Text(
+                    '${_twoDigits(_displayedTime.hour)}:${_twoDigits(_displayedTime.minute)}',
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+                  ),
                 ],
               ),
             ),
@@ -200,11 +255,15 @@ class _AddExpenseState extends State<AddExpenseRoute> {
             right: 0,
             child: TextFormField(
               maxLines: 1,
-              decoration: const InputDecoration(
+              showCursor: false,
+              decoration: InputDecoration(
                 labelText: 'Description',
-                floatingLabelStyle: TextStyle(color: Colors.white),
-                focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white))
+                floatingLabelStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary, fontSize: 19),
+                labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary, fontSize: 17),
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
               ),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSecondary, fontSize: 17),
               controller: _descriptionController,
             ),
           ),
@@ -243,7 +302,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
       ),
       body: Column(
         children: [
-          Expanded(child: _currentAmountDisplay()),
+          Expanded(child: _currentAmountDisplay(context)),
           Expanded(child: _calculator),
         ],
       ),

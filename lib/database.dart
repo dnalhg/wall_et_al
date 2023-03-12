@@ -22,6 +22,8 @@ class ExpenseDatabase {
   static const String _expenseTableName = 'expenses';
   static const String _categoriesTableName = 'categories';
 
+  static final CategoryEntry nullCategory = CategoryEntry(name: "None", icon: Icons.do_disturb_alt_sharp, color: Colors.red, id: 1);
+
   static ExpenseDatabase instance = ExpenseDatabase();
 
   static Future<Database> _initDatabase() async {
@@ -50,7 +52,6 @@ class ExpenseDatabase {
             )
             '''
         );
-        final nullCategory = CategoryEntry(name: "None", icon: Icons.do_disturb_alt_sharp, color: Colors.red);
         await db.insert(_categoriesTableName, nullCategory.toMap());
       },
       version: 1,
@@ -130,7 +131,7 @@ class ExpenseDatabase {
 }
 
 class CategoryEntry {
-  late final int? id;
+  int? id;
   final String name;
   final IconData icon;
   final Color color;
@@ -143,7 +144,7 @@ class CategoryEntry {
 
   factory CategoryEntry.fromMap(Map<String, dynamic> m) {
     return CategoryEntry(
-      id: m['id'],
+      id: m['id'] == 1 ? null : m['id'],
       name: m['name'],
       icon: IconData(m['icon'], fontFamily: "MaterialIcons"),
       color: Color(m['color'])
@@ -184,7 +185,7 @@ class ExpenseEntry {
   final double amount;
   final int msSinceEpoch;
   final String description;
-  final int categoryId;
+  final int? categoryId;
 
   const ExpenseEntry({
     required this.id,

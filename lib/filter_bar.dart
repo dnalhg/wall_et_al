@@ -156,7 +156,7 @@ class _FilterBarState extends State<FilterBar> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         IconButton(
-          icon: const Icon(Icons.chevron_left),
+          icon: Icon(Icons.chevron_left, color: Theme.of(context).colorScheme.onPrimary),
           onPressed: () => _incrementCurrentTimePeriod(false),
         ),
         PopupMenuButton<_TimeFilterGranularity>(
@@ -174,11 +174,11 @@ class _FilterBarState extends State<FilterBar> {
             alignment: Alignment.center,
             width: 200,
             height: 50,
-            child: Text(_getDisplayedTimePeriod(), style: const TextStyle(fontSize: 18)),
+            child: Text(_getDisplayedTimePeriod(), style: TextStyle(fontSize: 18, color: Theme.of(context).colorScheme.onPrimary)),
           )
         ),
         IconButton(
-          icon: const Icon(Icons.chevron_right),
+          icon: Icon(Icons.chevron_right, color: Theme.of(context).colorScheme.onPrimary),
           onPressed: () => _incrementCurrentTimePeriod(true),
         ),
       ],
@@ -192,15 +192,15 @@ class _FilterBarState extends State<FilterBar> {
       children: [
         Positioned(
           child: Container(
-            height: _isExpanded() ? 210 : 90,
+            height: _isExpanded() ? 210 : 70,
             decoration: const BoxDecoration(
               color: Colors.transparent,
             ),
-            padding: const EdgeInsets.only(top: 10),
+            padding: const EdgeInsets.only(top: 12),
             child: AnimatedContainer(
               duration: _animationTime,
               height: _isExpanded() ? 200 : 80,
-              color: Colors.blueGrey,
+              color: Theme.of(context).primaryColorLight,
               child: _buildTimeFilter(context),
             ),
           ),
@@ -213,14 +213,14 @@ class _FilterBarState extends State<FilterBar> {
               duration: _animationTime,
               height: 20,
               width: 80,
-              decoration: const BoxDecoration(
-                color: Colors.white,
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColorLight,
                 shape: BoxShape.rectangle,
-                borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                borderRadius: const BorderRadius.all(Radius.circular(8.0)),
               ),
               child: Icon(
                 _isExpanded() ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_up,
-                color: Colors.blue,
+                color: Theme.of(context).colorScheme.onPrimary,
               ),
             ),
           ),

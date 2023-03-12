@@ -46,9 +46,10 @@ class _CategoriesDropDownState extends State<CategoriesDropDown> {
               onChanged: (int? categoryId) {
                 widget.onCategorySelection(categoryId);
               },
-              decoration: const InputDecoration(
-                labelText: 'Select a category',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: 'Category',
+                labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+                border: InputBorder.none,
               ),
             );
           }
