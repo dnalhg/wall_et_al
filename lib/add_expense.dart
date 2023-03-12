@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:wall_et_al/categories_dropdown.dart';
+import 'package:wall_et_al/add_categories.dart';
 
 import 'calculator.dart';
 import 'database.dart';
@@ -32,7 +32,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
       getFinalAmountCallback: (Function callback) => _getFinalAmount = callback,
       entry: widget.entry,
     );
-    _categoryId = widget.entry?.categoryId ?? 1;
+    _categoryId = widget.entry?.categoryId ?? ExpenseDatabase.nullCategory.id!;
     _descriptionController = TextEditingController(text: widget.entry?.description);
     _displayedDate = DateTime.fromMillisecondsSinceEpoch(widget.entry?.msSinceEpoch ?? DateTime.now().millisecondsSinceEpoch);
     _displayedTime = TimeOfDay.fromDateTime(_displayedDate);
@@ -105,6 +105,17 @@ class _AddExpenseState extends State<AddExpenseRoute> {
 
       return true;
     }
+  }
+
+  void _handleCategoryPicker(BuildContext context) {
+    Navigator.push<CategoryEntry>(
+      context,
+      MaterialPageRoute(builder: (context) => AddCategoryPage(isChoosing: true)),
+    ).then((CategoryEntry? entry) {
+      setState(() {
+        _categoryId = entry?.id ?? ExpenseDatabase.nullCategory.id!;
+      });
+    });
   }
 
   Future<void> _handleDatePicker() async {
@@ -188,7 +199,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
             left: 0,
             bottom: 80,
             child: InkWell(
-              onTap: _handleDatePicker,
+              onTap: () => _handleCategoryPicker(context),
               child: SizedBox(
                 // height: 38,
                 width: 150,
@@ -204,14 +215,6 @@ class _AddExpenseState extends State<AddExpenseRoute> {
                 ),
               ),
             ),
-            // child: SizedBox(
-            //   width: 150,
-            //   child: CategoriesDropDown(categoryId: _categoryId, onCategorySelection: (int? newCategoryId) {
-            //     setState(() {
-            //       _categoryId = newCategoryId;
-            //     });
-            //   })
-            // ),
           ),
           Positioned(
             right: 90,

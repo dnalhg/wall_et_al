@@ -7,10 +7,12 @@ import 'package:wall_et_al/wallet_app_bar.dart';
 
 
 class AddCategoryPage extends StatefulWidget {
-  const AddCategoryPage({super.key});
+  bool isChoosing;
+
+  AddCategoryPage({super.key, required this.isChoosing});
 
   @override
-  _AddCategoryPageState createState() => _AddCategoryPageState();
+  State<AddCategoryPage> createState() => _AddCategoryPageState();
 }
 
 class _AddCategoryPageState extends State<AddCategoryPage> {
@@ -27,6 +29,33 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
     return await ExpenseDatabase.instance.getCategories();
   }
 
+  void _handleTileTap(BuildContext context, CategoryEntry entry) {
+    if (_isEditing) {
+      _openAddListItemModal((name, color, icon) {
+        _updateCategory(entry);
+      }, entry);
+    } else if (widget.isChoosing) {
+      Navigator.of(context).pop(entry);
+    }
+    return;
+  }
+
+  Widget? _buildCategoryDeletionButton(CategoryEntry entry) {
+    if (_isEditing) {
+      if (entry.id == ExpenseDatabase.nullCategory.id) {
+        return null;
+      }
+
+      return IconButton(
+        icon: const Icon(Icons.delete),
+        onPressed: () {
+          _removeCategory(entry);
+        },
+      );
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,32 +70,19 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
         future: _categoriesFuture,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            final List<CategoryEntry> _categories = snapshot.data!;
+            final List<CategoryEntry> categories = snapshot.data!;
 
             return ListView.builder(
               padding: EdgeInsets.zero,
-              itemCount: _categories.length,
+              itemCount: categories.length,
               itemBuilder: (context, index) {
                 return Card(
                   child: ListTile(
-                    tileColor: _categories[index].color,
-                    leading: Icon(_categories[index].icon),
-                    title: Text(_categories[index].name),
-                    trailing: _isEditing
-                        ? IconButton(
-                      icon: Icon(Icons.delete),
-                      onPressed: () {
-                        _removeCategory(_categories[index]);
-                      },
-                    )
-                        : null,
-                    onTap: _isEditing
-                        ? () {
-                      _openAddListItemModal((name, color, icon) {
-                        _updateCategory(_categories[index]);
-                      }, _categories[index]);
-                    }
-                        : null,
+                    tileColor: categories[index].color,
+                    leading: Icon(categories[index].icon),
+                    title: Text(categories[index].name),
+                    trailing: _buildCategoryDeletionButton(categories[index]),
+                    onTap: () => _handleTileTap(context, categories[index]),
                   ),
                 );
               },
@@ -74,7 +90,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
           } else if (snapshot.hasError) {
             return Text('Error: ${snapshot.error}');
           } else {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
         },
       ),
@@ -87,8 +103,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
                   });
                 }, null);
               },
-              tooltip: 'Add Task',
-              child: Icon(Icons.add),
+              child: const Icon(Icons.add),
             )
           : null,
     );

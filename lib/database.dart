@@ -144,7 +144,7 @@ class CategoryEntry {
 
   factory CategoryEntry.fromMap(Map<String, dynamic> m) {
     return CategoryEntry(
-      id: m['id'] == 1 ? null : m['id'],
+      id: m['id'],
       name: m['name'],
       icon: IconData(m['icon'], fontFamily: "MaterialIcons"),
       color: Color(m['color'])
