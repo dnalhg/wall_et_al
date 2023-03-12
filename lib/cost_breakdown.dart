@@ -24,7 +24,7 @@ class _CostBreakdownState extends State<CostBreakdown>{
       context,
       MaterialPageRoute(builder: (context) => AddExpenseRoute(entry: e)),
     ).then((Future<void>? saveComplete) async {
-      await saveComplete!;
+      if (saveComplete != null) await saveComplete!;
       setState(() {
         _getExpenses(forceUpdate: true);
       });

@@ -25,7 +25,8 @@ class _AddExpenseState extends State<AddExpenseRoute> {
 
   Future<CategoryEntry> _initCategory() async {
     return (await ExpenseDatabase.instance.getCategories())
-        .firstWhere((CategoryEntry e) => e.id == widget.entry?.categoryId, orElse: () => ExpenseDatabase.nullCategory);
+        .firstWhere((CategoryEntry e) => e.id == widget.entry?.categoryId,
+        orElse: () => ExpenseDatabase.nullCategory);
   }
 
   @override
@@ -36,8 +37,12 @@ class _AddExpenseState extends State<AddExpenseRoute> {
       entry: widget.entry,
     );
     _category = _initCategory();
-    _descriptionController = TextEditingController(text: widget.entry?.description);
-    _displayedDate = DateTime.fromMillisecondsSinceEpoch(widget.entry?.msSinceEpoch ?? DateTime.now().millisecondsSinceEpoch);
+    _descriptionController =
+        TextEditingController(text: widget.entry?.description);
+    _displayedDate = DateTime.fromMillisecondsSinceEpoch(
+        widget.entry?.msSinceEpoch ?? DateTime
+            .now()
+            .millisecondsSinceEpoch);
     _displayedTime = TimeOfDay.fromDateTime(_displayedDate);
     super.initState();
   }
@@ -63,7 +68,9 @@ class _AddExpenseState extends State<AddExpenseRoute> {
 
 
   int _getDisplayedDateTimeInMs() {
-    return DateTime(_displayedDate.year, _displayedDate.month, _displayedDate.day, _displayedTime.hour, _displayedTime.minute).millisecondsSinceEpoch;
+    return DateTime(
+        _displayedDate.year, _displayedDate.month, _displayedDate.day,
+        _displayedTime.hour, _displayedTime.minute).millisecondsSinceEpoch;
   }
 
   Future<ExpenseEntry> _createExpense(double finalAmount, {int? id}) async {
@@ -93,11 +100,11 @@ class _AddExpenseState extends State<AddExpenseRoute> {
         }
         // Failed to add so raise an error
       });
-
     } else {
       return Future.delayed(Duration.zero, () async {
         ExpenseEntry oldEntry = widget.entry!;
-        ExpenseEntry newEntry = await _createExpense(finalAmount, id: oldEntry.id);
+        ExpenseEntry newEntry = await _createExpense(
+            finalAmount, id: oldEntry.id);
         if (oldEntry != newEntry) {
           int status = await ExpenseDatabase.instance.updateExpense(newEntry);
           if (status == 0) {
@@ -109,9 +116,11 @@ class _AddExpenseState extends State<AddExpenseRoute> {
   }
 
   void _handleCategoryPicker(BuildContext context) {
+    _resetFocus();
     Navigator.push<CategoryEntry>(
       context,
-      MaterialPageRoute(builder: (context) => AddCategoryPage(chosen: _category)),
+      MaterialPageRoute(
+          builder: (context) => AddCategoryPage(chosen: _category)),
     ).then((CategoryEntry? entry) {
       setState(() {
         _category = Future.value(entry ?? ExpenseDatabase.nullCategory);
@@ -120,6 +129,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
   }
 
   Future<void> _handleDatePicker() async {
+    _resetFocus();
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _displayedDate,
@@ -134,6 +144,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
   }
 
   Future<void> _handleTimePicker() async {
+    _resetFocus();
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: _displayedTime,
@@ -152,29 +163,38 @@ class _AddExpenseState extends State<AddExpenseRoute> {
 
   Widget _getCategoryName(BuildContext context) {
     return FutureBuilder(
-      future: _category,
-      builder: (BuildContext context, AsyncSnapshot<CategoryEntry> snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          String text;
-          if (snapshot.hasError) {
-            text = 'Error: ${snapshot.error}';
-          } else if (!snapshot.hasData) {
-            text = 'Error: no data';
+        future: _category,
+        builder: (BuildContext context, AsyncSnapshot<CategoryEntry> snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            String text;
+            if (snapshot.hasError) {
+              text = 'Error: ${snapshot.error}';
+            } else if (!snapshot.hasData) {
+              text = 'Error: no data';
+            } else {
+              CategoryEntry entry = snapshot.data!;
+              text = entry.name;
+            }
+            return Text(text, style: TextStyle(color: Theme
+                .of(context)
+                .colorScheme
+                .onPrimary, fontSize: 17));
           } else {
-            CategoryEntry entry = snapshot.data!;
-            text = entry.name;
+            return Text('', style: TextStyle(color: Theme
+                .of(context)
+                .colorScheme
+                .onPrimary, fontSize: 17));
           }
-          return Text(text, style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 17));
-        } else {
-          return Text('', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 17));
         }
-      }
     );
   }
 
   Widget _currentAmountDisplay(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(color: Theme.of(context).colorScheme.primaryContainer),
+      decoration: BoxDecoration(color: Theme
+          .of(context)
+          .colorScheme
+          .primaryContainer),
       padding: const EdgeInsets.all(16),
       child: Stack(
         children: [
@@ -184,9 +204,12 @@ class _AddExpenseState extends State<AddExpenseRoute> {
             child: FittedBox(
               fit: BoxFit.fitWidth,
               child: Text(_displayedAmount, style: TextStyle(
-                color: Theme.of(context).colorScheme.onPrimary,
-                fontSize: 58,
-                fontWeight: FontWeight.bold),
+                  color: Theme
+                      .of(context)
+                      .colorScheme
+                      .onPrimary,
+                  fontSize: 58,
+                  fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -203,7 +226,10 @@ class _AddExpenseState extends State<AddExpenseRoute> {
                   children: [
                     Text(
                       'Category',
-                      style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 14),
+                      style: TextStyle(color: Theme
+                          .of(context)
+                          .colorScheme
+                          .onPrimary, fontSize: 14),
                     ),
                     _getCategoryName(context),
                   ],
@@ -219,11 +245,18 @@ class _AddExpenseState extends State<AddExpenseRoute> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.calendar_today, color: Theme.of(context).colorScheme.onPrimary),
+                  Icon(Icons.calendar_today, color: Theme
+                      .of(context)
+                      .colorScheme
+                      .onPrimary),
                   const SizedBox(width: 8),
                   Text(
-                    '${_twoDigits(_displayedDate.day)}-${_twoDigits(_displayedDate.month)}-${_displayedDate.year}',
-                    style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                    '${_twoDigits(_displayedDate.day)}-${_twoDigits(
+                        _displayedDate.month)}-${_displayedDate.year}',
+                    style: TextStyle(color: Theme
+                        .of(context)
+                        .colorScheme
+                        .onPrimary),
                   ),
                 ],
               ),
@@ -237,11 +270,18 @@ class _AddExpenseState extends State<AddExpenseRoute> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.timelapse, color: Theme.of(context).colorScheme.onPrimary),
+                  Icon(Icons.timelapse, color: Theme
+                      .of(context)
+                      .colorScheme
+                      .onPrimary),
                   const SizedBox(width: 8),
                   Text(
-                    '${_twoDigits(_displayedTime.hour)}:${_twoDigits(_displayedTime.minute)}',
-                    style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                    '${_twoDigits(_displayedTime.hour)}:${_twoDigits(
+                        _displayedTime.minute)}',
+                    style: TextStyle(color: Theme
+                        .of(context)
+                        .colorScheme
+                        .onPrimary),
                   ),
                 ],
               ),
@@ -256,12 +296,21 @@ class _AddExpenseState extends State<AddExpenseRoute> {
               showCursor: false,
               decoration: InputDecoration(
                 labelText: 'Description',
-                floatingLabelStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 19),
-                labelStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 17),
+                floatingLabelStyle: TextStyle(color: Theme
+                    .of(context)
+                    .colorScheme
+                    .onPrimary, fontSize: 19),
+                labelStyle: TextStyle(color: Theme
+                    .of(context)
+                    .colorScheme
+                    .onPrimary, fontSize: 17),
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
               ),
-              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 17),
+              style: TextStyle(color: Theme
+                  .of(context)
+                  .colorScheme
+                  .onPrimary, fontSize: 17),
               controller: _descriptionController,
             ),
           ),
@@ -270,40 +319,49 @@ class _AddExpenseState extends State<AddExpenseRoute> {
     );
   }
 
+  void _resetFocus() {
+    FocusScope.of(context).unfocus();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        actions: [
-          if (widget.entry != null)...[
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () async {
-              ExpenseDatabase.instance.removeExpense(widget.entry!);
-              Navigator.of(context).pop();
-            },
-          )],
-          IconButton(
-            icon: const Icon(Icons.check),
-            onPressed: () async {
-              Future<void>? saveComplete = _saveExpense();
-              if (saveComplete != null) {
-                Navigator.of(context).pop(saveComplete);
-              }
-            },
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () => _resetFocus(),
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () => Navigator.of(context).pop(),
           ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded(child: _currentAmountDisplay(context)),
-          Expanded(child: _calculator),
-        ],
+          actions: [
+            if (widget.entry != null)...[
+              IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: () async {
+                  ExpenseDatabase.instance.removeExpense(widget.entry!);
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+            IconButton(
+              icon: const Icon(Icons.check),
+              onPressed: () async {
+                Future<void>? saveComplete = _saveExpense();
+                if (saveComplete != null) {
+                  Navigator.of(context).pop(saveComplete);
+                }
+              },
+            ),
+          ],
+        ),
+        body: Column(
+          children: [
+            Expanded(child: _currentAmountDisplay(context)),
+            Expanded(child: _calculator),
+          ],
+        ),
       ),
     );
   }
