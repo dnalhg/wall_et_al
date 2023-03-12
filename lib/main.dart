@@ -97,10 +97,10 @@ class _MainState extends State<Main>{
         Align(alignment: Alignment.bottomCenter, child: FilterBar(onExpand: _toggleExpansion, getExpansionState: _getExpansionState, updateTimeFilter: _updateTimeFilter)),
       ]),
       floatingActionButton: _expandedBottomBar ? null : Padding(
-        padding: const EdgeInsets.only(bottom: 55),
+        padding: const EdgeInsets.only(bottom: 75),
         child: FloatingActionButton(
             onPressed: () => _navigateToAddExpenseRoute(context),
-            backgroundColor: Theme.of(context).primaryColorLight,
+            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
             tooltip: 'Add new expense',
             child: Icon(Icons.add, color: Theme.of(context).colorScheme.onPrimary),
           ),

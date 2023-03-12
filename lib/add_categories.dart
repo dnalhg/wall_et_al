@@ -31,6 +31,9 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
 
   void _handleTileTap(BuildContext context, CategoryEntry entry) {
     if (_isEditing) {
+      if (entry.id == ExpenseDatabase.nullCategory.id) {
+        return;
+      }
       _openAddListItemModal((name, color, icon) {
         _updateCategory(entry);
       }, entry);
@@ -96,6 +99,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
       ),
       floatingActionButton: _isEditing
           ? FloatingActionButton(
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
               onPressed: () {
                 _openAddListItemModal((name, color, icon) {
                   setState(() {
@@ -103,7 +107,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
                   });
                 }, null);
               },
-              child: const Icon(Icons.add),
+              child: Icon(Icons.add, color: Theme.of(context).colorScheme.onPrimary),
             )
           : null,
     );

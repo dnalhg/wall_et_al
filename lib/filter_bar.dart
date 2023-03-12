@@ -185,6 +185,9 @@ class _FilterBarState extends State<FilterBar> {
     );
   }
 
+  static const double _toggleButtonHeight = 40;
+  static const double _containerHeight = 70;
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -192,15 +195,15 @@ class _FilterBarState extends State<FilterBar> {
       children: [
         Positioned(
           child: Container(
-            height: _isExpanded() ? 210 : 70,
+            height: _isExpanded() ? 210 : _containerHeight + _toggleButtonHeight/2,
             decoration: const BoxDecoration(
               color: Colors.transparent,
             ),
-            padding: const EdgeInsets.only(top: 12),
+            padding: const EdgeInsets.only(top: _toggleButtonHeight/2),
             child: AnimatedContainer(
               duration: _animationTime,
-              height: _isExpanded() ? 200 : 80,
-              color: Theme.of(context).primaryColorLight,
+              height: _isExpanded() ? 200 : _containerHeight,
+              color: Theme.of(context).colorScheme.surface,
               child: _buildTimeFilter(context),
             ),
           ),
@@ -211,16 +214,19 @@ class _FilterBarState extends State<FilterBar> {
             onTap: () => widget.onExpand(),
             child: AnimatedContainer(
               duration: _animationTime,
-              height: 20,
-              width: 80,
+              height: _toggleButtonHeight,
+              width: 100,
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColorLight,
+                color: Theme.of(context).colorScheme.surface,
                 shape: BoxShape.rectangle,
-                borderRadius: const BorderRadius.all(Radius.circular(8.0)),
+                borderRadius: const BorderRadius.all(Radius.circular(_toggleButtonHeight/2)),
               ),
-              child: Icon(
-                _isExpanded() ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_up,
-                color: Theme.of(context).colorScheme.onPrimary,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: _toggleButtonHeight/3),
+                child: Icon(
+                  _isExpanded() ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_up,
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                ),
               ),
             ),
           ),
