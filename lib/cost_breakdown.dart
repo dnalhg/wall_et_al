@@ -20,12 +20,15 @@ class _CostBreakdownState extends State<CostBreakdown>{
   late List<CategoryEntry> _categories;
 
   void _expandExpense(BuildContext context, ExpenseEntry e) {
-    Navigator.push(
+    Navigator.push<Future<void>?>(
       context,
       MaterialPageRoute(builder: (context) => AddExpenseRoute(entry: e)),
-    ).then((_) => setState(() {
-      _getExpenses(forceUpdate: true);
-    }));
+    ).then((Future<void>? saveComplete) async {
+      await saveComplete!;
+      setState(() {
+        _getExpenses(forceUpdate: true);
+      });
+    });
   }
 
   ListTile _createExpenseView(BuildContext context, ExpenseEntry e) {

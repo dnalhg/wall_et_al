@@ -1,21 +1,8 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-
-
-class DatabaseUtils {
-  static final Random _rand = Random.secure();
-
-  static String createCryptoRandomString([int length = 32]) {
-    var values = List<int>.generate(length, (i) => _rand.nextInt(256));
-
-    return base64Url.encode(values);
-  }
-}
 
 class ExpenseDatabase {
   static final Future<Database> _database = _initDatabase();
@@ -43,7 +30,7 @@ class ExpenseDatabase {
         await db.execute(
             '''
             CREATE TABLE $_expenseTableName(
-              id STRING PRIMARY KEY,
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
               amount REAL,
               ms_since_epoch INTEGER, 
               description STRING, 
@@ -152,11 +139,15 @@ class CategoryEntry {
   }
 
   Map<String, dynamic> toMap() {
-    return {
+    Map<String, dynamic> res = {
       'name' : name,
       'icon' : icon.codePoint,
       'color' : color.value,
     };
+    if (id != null) {
+      res['id'] = id;
+    }
+    return res;
   }
 
   @override
@@ -181,7 +172,7 @@ class CategoryEntry {
 
 
 class ExpenseEntry {
-  final String id;
+  final int? id;
   final double amount;
   final int msSinceEpoch;
   final String description;
@@ -206,13 +197,16 @@ class ExpenseEntry {
   }
 
   Map<String, dynamic> toMap() {
-    return {
-      'id': id,
+    Map<String, dynamic> res = {
       'amount': amount,
       'ms_since_epoch': msSinceEpoch,
       'description': description,
       'category_id': categoryId,
     };
+    if (id != null) {
+      res['id'] = id;
+    }
+    return res;
   }
 
   @override
@@ -226,6 +220,7 @@ class ExpenseEntry {
       return false;
     }
     return other.id == id && other.amount == amount &&
-        other.msSinceEpoch == msSinceEpoch && other.categoryId == categoryId;
+        other.msSinceEpoch == msSinceEpoch && other.categoryId == categoryId
+        && other.description == description;
   }
 }

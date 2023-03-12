@@ -17,25 +17,29 @@ class _AddExpenseState extends State<AddExpenseRoute> {
 
   late Calculator _calculator;
   late TextEditingController _descriptionController;
-  late int _categoryId;
+  late Future<CategoryEntry> _category;
   late DateTime _displayedDate;
   late TimeOfDay _displayedTime;
   Function? _getFinalAmount;
   String _displayedAmount = "0";
 
+  Future<CategoryEntry> _initCategory() async {
+    return (await ExpenseDatabase.instance.getCategories())
+        .firstWhere((CategoryEntry e) => e.id == widget.entry?.categoryId, orElse: () => ExpenseDatabase.nullCategory);
+  }
 
   @override
   void initState() {
-    super.initState();
     _calculator = Calculator(
       onButtonPressed: _setDisplayedAmount,
       getFinalAmountCallback: (Function callback) => _getFinalAmount = callback,
       entry: widget.entry,
     );
-    _categoryId = widget.entry?.categoryId ?? ExpenseDatabase.nullCategory.id!;
+    _category = _initCategory();
     _descriptionController = TextEditingController(text: widget.entry?.description);
     _displayedDate = DateTime.fromMillisecondsSinceEpoch(widget.entry?.msSinceEpoch ?? DateTime.now().millisecondsSinceEpoch);
     _displayedTime = TimeOfDay.fromDateTime(_displayedDate);
+    super.initState();
   }
 
   void _setDisplayedAmount(String amount) {
@@ -62,58 +66,55 @@ class _AddExpenseState extends State<AddExpenseRoute> {
     return DateTime(_displayedDate.year, _displayedDate.month, _displayedDate.day, _displayedTime.hour, _displayedTime.minute).millisecondsSinceEpoch;
   }
 
-  ExpenseEntry _createExpense(String id, double finalAmount) {
+  Future<ExpenseEntry> _createExpense(double finalAmount, {int? id}) async {
     return ExpenseEntry(
       id: id,
       amount: finalAmount,
       msSinceEpoch: _getDisplayedDateTimeInMs(),
       description: _getDescription(),
-      categoryId: _categoryId,
+      categoryId: (await _category).id,
     );
   }
 
-  bool _saveExpense() {
+  Future<void>? _saveExpense() {
     double finalAmount = _getFinalAmount == null ? 0.0 : _getFinalAmount!();
     if (finalAmount.isNaN) {
       _raiseError("Invalid amount entered");
-      return false;
+      return null;
     }
 
     if (widget.entry == null) {
-      Future<void> tryAddEntry() async {
+      return Future.delayed(Duration.zero, () async {
         // Try insert 5 times with retries
-        for (int i=0; i < 5; i++) {
-          String dbId = DatabaseUtils.createCryptoRandomString();
-          ExpenseEntry e = _createExpense(dbId, finalAmount);
-          int status = await ExpenseDatabase.instance.insertExpense(e);
-          if (status != 0) {
-            return;
-          }
+        ExpenseEntry e = await _createExpense(finalAmount);
+        int status = await ExpenseDatabase.instance.insertExpense(e);
+        if (status == 0) {
+          _raiseError("Could not add expense to database");
         }
         // Failed to add so raise an error
-        _raiseError("Could not add expense to database");
-      }
+      });
 
-      tryAddEntry();
-      return true;
     } else {
-      ExpenseEntry oldEntry = widget.entry!;
-      ExpenseEntry newEntry = _createExpense(oldEntry.id, finalAmount);
-      if (oldEntry != newEntry) {
-        ExpenseDatabase.instance.updateExpense(newEntry);
-      }
-
-      return true;
+      return Future.delayed(Duration.zero, () async {
+        ExpenseEntry oldEntry = widget.entry!;
+        ExpenseEntry newEntry = await _createExpense(finalAmount, id: oldEntry.id);
+        if (oldEntry != newEntry) {
+          int status = await ExpenseDatabase.instance.updateExpense(newEntry);
+          if (status == 0) {
+            _raiseError("Could not add expense to database");
+          }
+        }
+      });
     }
   }
 
   void _handleCategoryPicker(BuildContext context) {
     Navigator.push<CategoryEntry>(
       context,
-      MaterialPageRoute(builder: (context) => AddCategoryPage(isChoosing: true)),
+      MaterialPageRoute(builder: (context) => const AddCategoryPage(isChoosing: true)),
     ).then((CategoryEntry? entry) {
       setState(() {
-        _categoryId = entry?.id ?? ExpenseDatabase.nullCategory.id!;
+        _category = Future.value(entry ?? ExpenseDatabase.nullCategory);
       });
     });
   }
@@ -149,20 +150,10 @@ class _AddExpenseState extends State<AddExpenseRoute> {
     return "0$n";
   }
 
-  int? _previousCategoryId;
-  Future<List<CategoryEntry>>? _categories;
-  Future<List<CategoryEntry>> _getCategories() {
-    if (_categories == null || _previousCategoryId == null || _previousCategoryId != _categoryId) {
-      _previousCategoryId = _categoryId;
-      _categories = ExpenseDatabase.instance.getCategories();
-    }
-    return _categories!;
-  }
-
   Widget _getCategoryName(BuildContext context) {
     return FutureBuilder(
-      future: _getCategories(),
-      builder: (BuildContext context, AsyncSnapshot<List<CategoryEntry>> snapshot) {
+      future: _category,
+      builder: (BuildContext context, AsyncSnapshot<CategoryEntry> snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           String text;
           if (snapshot.hasError) {
@@ -170,14 +161,8 @@ class _AddExpenseState extends State<AddExpenseRoute> {
           } else if (!snapshot.hasData) {
             text = 'Error: no data';
           } else {
-            List<CategoryEntry> entries = snapshot.data!;
-            text = entries.firstWhere(
-                (CategoryEntry e) => e.id == _categoryId,
-                orElse: () {
-                  _categoryId = ExpenseDatabase.nullCategory.id!;
-                  return ExpenseDatabase.nullCategory;
-                }
-              ).name;
+            CategoryEntry entry = snapshot.data!;
+            text = entry.name;
           }
           return Text(text, style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 17));
         } else {
@@ -306,8 +291,9 @@ class _AddExpenseState extends State<AddExpenseRoute> {
           IconButton(
             icon: const Icon(Icons.check),
             onPressed: () async {
-              if (_saveExpense()) {
-                Navigator.of(context).pop();
+              Future<void>? saveComplete = _saveExpense();
+              if (saveComplete != null) {
+                Navigator.of(context).pop(saveComplete);
               }
             },
           ),

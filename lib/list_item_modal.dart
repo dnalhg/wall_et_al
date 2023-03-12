@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:wall_et_al/constants.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:wall_et_al/database.dart';
 
@@ -8,10 +7,10 @@ class ListItemModal extends StatefulWidget {
   final Function(String, Color, IconData) onAddItem;
   final CategoryEntry? category;
 
-  ListItemModal({super.key, required this.onAddItem, this.category});
+  const ListItemModal({super.key, required this.onAddItem, this.category});
 
   @override
-  _ListItemModalState createState() => _ListItemModalState();
+  State<ListItemModal> createState() => _ListItemModalState();
 }
 
 class _ListItemModalState extends State<ListItemModal> {
@@ -74,7 +73,7 @@ class _ListItemModalState extends State<ListItemModal> {
                   _selectedColor = color;
                 });
               },
-              showLabel: true,
+              labelTypes: const [],
               pickerAreaHeightPercent: 0.8,
             ),
           ),
@@ -102,13 +101,13 @@ class _ListItemModalState extends State<ListItemModal> {
               children: [
                 IconButton(
                   onPressed: _selectColor,
-                  icon: Icon(Icons.color_lens_rounded),
+                  icon: const Icon(Icons.color_lens_rounded),
                   color: _selectedColor,
                 ),
                 Expanded(
                   child: TextFormField(
                     controller: _textController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Text',
                     ),
                     validator: (value) {
@@ -121,7 +120,7 @@ class _ListItemModalState extends State<ListItemModal> {
                 ),
               ],
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Wrap(
               spacing: 8.0,
               children: _icons
@@ -145,7 +144,7 @@ class _ListItemModalState extends State<ListItemModal> {
           onPressed: () {
             Navigator.pop(context);
           },
-          child: Text('Cancel'),
+          child: const Text('Cancel'),
         ),
         TextButton(
           onPressed: !_isButtonEnabled

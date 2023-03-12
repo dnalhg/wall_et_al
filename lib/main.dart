@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(brightness: Brightness.dark),
       home: const Main(),
       routes: {
-        Constants.CATEGORIES_PAGE_ROUTE: (context) => AddCategoryPage(isChoosing: false)
+        Constants.CATEGORIES_PAGE_ROUTE: (context) => const AddCategoryPage(isChoosing: false)
       },
     );
   }

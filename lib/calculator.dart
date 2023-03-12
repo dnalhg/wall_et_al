@@ -23,6 +23,7 @@ class _CalculatorState extends State<Calculator> {
   void initState() {
     super.initState();
     _resetState(entry: widget.entry);
+    widget.getFinalAmountCallback(() => _getFinalAmount());
   }
 
   void _resetState({ExpenseEntry? entry}) {
@@ -155,7 +156,6 @@ class _CalculatorState extends State<Calculator> {
     }
 
     widget.onButtonPressed(_getDisplayedAmount());
-    widget.getFinalAmountCallback(() => _getFinalAmount());
   }
 
   double _getFinalAmount() {

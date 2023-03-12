@@ -7,9 +7,9 @@ import 'package:wall_et_al/wallet_app_bar.dart';
 
 
 class AddCategoryPage extends StatefulWidget {
-  bool isChoosing;
+  final bool isChoosing;
 
-  AddCategoryPage({super.key, required this.isChoosing});
+  const AddCategoryPage({super.key, required this.isChoosing});
 
   @override
   State<AddCategoryPage> createState() => _AddCategoryPageState();
@@ -35,7 +35,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
         return;
       }
       _openAddListItemModal((name, color, icon) {
-        _updateCategory(entry);
+        _updateCategory(CategoryEntry(name: name, icon: icon, color: color, id: entry.id));
       }, entry);
     } else if (widget.isChoosing) {
       Navigator.of(context).pop(entry);
@@ -85,7 +85,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
                     leading: Icon(categories[index].icon),
                     title: Text(categories[index].name),
                     trailing: _buildCategoryDeletionButton(categories[index]),
-                    onTap: () => _handleTileTap(context, categories[index]),
+                    onTap: _isEditing || widget.isChoosing ? () => _handleTileTap(context, categories[index]) : null,
                   ),
                 );
               },
