@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:wall_et_al/database.dart';
 
-
 class ListItemModal extends StatefulWidget {
   final Function(String, Color, IconData) onAddItem;
   final CategoryEntry? category;
@@ -93,7 +92,8 @@ class _ListItemModalState extends State<ListItemModal> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(widget.category != null ? 'Edit Item' : 'Add Item'),
+      title: Text(widget.category != null ? 'Edit Item' : 'Add Item',
+          style: Theme.of(context).textTheme.titleLarge),
       content: Form(
           key: _formKey,
           child: Column(mainAxisSize: MainAxisSize.min, children: [
@@ -144,7 +144,7 @@ class _ListItemModalState extends State<ListItemModal> {
           onPressed: () {
             Navigator.pop(context);
           },
-          child: const Text('Cancel'),
+          child: Text('Cancel', style: Theme.of(context).textTheme.labelLarge),
         ),
         TextButton(
           onPressed: !_isButtonEnabled
@@ -152,7 +152,8 @@ class _ListItemModalState extends State<ListItemModal> {
               : () => {
                     if (_formKey.currentState!.validate()) {_submit()}
                   },
-          child: Text(widget.category != null ? 'Save' : 'Add'),
+          child: Text(widget.category != null ? 'Save' : 'Add',
+              style: Theme.of(context).textTheme.labelLarge),
         ),
       ],
     );

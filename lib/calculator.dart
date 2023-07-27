@@ -8,7 +8,11 @@ class Calculator extends StatefulWidget {
   final Function getFinalAmountCallback;
   final ExpenseEntry? entry;
 
-  const Calculator({super.key, required this.onButtonPressed, required this.getFinalAmountCallback, this.entry});
+  const Calculator(
+      {super.key,
+      required this.onButtonPressed,
+      required this.getFinalAmountCallback,
+      this.entry});
 
   @override
   State<Calculator> createState() => _CalculatorState();
@@ -31,7 +35,8 @@ class _CalculatorState extends State<Calculator> {
       _currentInput = '';
     } else {
       _currentInput = _getComputedAmountAsString(entry.amount);
-      WidgetsBinding.instance.addPostFrameCallback((_) => widget.onButtonPressed(_currentInput));
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => widget.onButtonPressed(_currentInput));
     }
     _prevInput = null;
     _currentAction = null;
@@ -168,77 +173,95 @@ class _CalculatorState extends State<Calculator> {
     return Row(
       children: [
         Expanded(
-          flex: 5,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              CalculatorButton(value: '7', onPressed: _registerButton),
-              CalculatorButton(value: '4', onPressed: _registerButton),
-              CalculatorButton(value: '1', onPressed: _registerButton),
-              CalculatorButton(value: '.', onPressed: _registerButton),
-            ],
-          )
-        ),
+            flex: 5,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                CalculatorButton(value: '7', onPressed: _registerButton),
+                CalculatorButton(value: '4', onPressed: _registerButton),
+                CalculatorButton(value: '1', onPressed: _registerButton),
+                CalculatorButton(value: '.', onPressed: _registerButton),
+              ],
+            )),
         Expanded(
-          flex: 5,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              CalculatorButton(value: '8', onPressed: _registerButton),
-              CalculatorButton(value: '5', onPressed: _registerButton),
-              CalculatorButton(value: '2', onPressed: _registerButton),
-              CalculatorButton(value: '0', onPressed: _registerButton),
-            ],
-          )
-        ),
+            flex: 5,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                CalculatorButton(value: '8', onPressed: _registerButton),
+                CalculatorButton(value: '5', onPressed: _registerButton),
+                CalculatorButton(value: '2', onPressed: _registerButton),
+                CalculatorButton(value: '0', onPressed: _registerButton),
+              ],
+            )),
         Expanded(
-          flex: 5,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              CalculatorButton(value: '9', onPressed: _registerButton),
-              CalculatorButton(value: '6', onPressed: _registerButton),
-              CalculatorButton(value: '3', onPressed: _registerButton),
-              CalculatorButton(value: _CalculatorOperations.delete.name, onPressed: _registerButton),
-            ],
-          )
-        ),
+            flex: 5,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                CalculatorButton(value: '9', onPressed: _registerButton),
+                CalculatorButton(value: '6', onPressed: _registerButton),
+                CalculatorButton(value: '3', onPressed: _registerButton),
+                CalculatorButton(
+                    value: _CalculatorOperations.delete.name,
+                    onPressed: _registerButton),
+              ],
+            )),
         Expanded(
-          flex: 4,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              CalculatorButton(value: _CalculatorOperations.divide.name, onPressed: _registerButton),
-              CalculatorButton(value: _CalculatorOperations.multiply.name, onPressed: _registerButton),
-              CalculatorButton(value: _CalculatorOperations.subtract.name, onPressed: _registerButton),
-              CalculatorButton(value: _CalculatorOperations.plus.name, onPressed: _registerButton),
-              CalculatorButton(value: _CalculatorOperations.equals.name, onPressed: _registerButton),
-            ],
-          )
-        ),
+            flex: 4,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                CalculatorButton(
+                    value: _CalculatorOperations.divide.name,
+                    onPressed: _registerButton),
+                CalculatorButton(
+                    value: _CalculatorOperations.multiply.name,
+                    onPressed: _registerButton),
+                CalculatorButton(
+                    value: _CalculatorOperations.subtract.name,
+                    onPressed: _registerButton),
+                CalculatorButton(
+                    value: _CalculatorOperations.plus.name,
+                    onPressed: _registerButton),
+                CalculatorButton(
+                    value: _CalculatorOperations.equals.name,
+                    onPressed: _registerButton),
+              ],
+            )),
       ],
     );
   }
-
 }
 
 class CalculatorButton extends StatelessWidget {
   final String value;
   final Function onPressed;
 
-  static final Map<String, Widget> _valueToIcon = ({for (int i in [for (int i = 0; i <= 9; i++) i])
-    i.toString() : Text(i.toString(), style: const TextStyle(fontSize: 30, color: Colors.white54)) })
+  static final Map<String, Widget> _valueToIcon = ({
+    for (int i in [for (int i = 0; i <= 9; i++) i])
+      i.toString(): Text(i.toString(),
+          style: const TextStyle(fontSize: 30, color: Colors.white54))
+  })
     ..addAll({
-      '.' : const Text('.', style: TextStyle(fontSize: 30, color: Colors.white54)),
-      _CalculatorOperations.delete.name: const Icon(Icons.backspace, size: 18, color: Colors.white60),
-      _CalculatorOperations.divide.name: const Icon(CustomIcons.divide, size: 18, color: Colors.white54),
-      _CalculatorOperations.multiply.name: const Icon(Icons.close_sharp, color: Colors.white54),
-      _CalculatorOperations.subtract.name: const Icon(Icons.remove, color: Colors.white54),
-      _CalculatorOperations.plus.name: const Icon(Icons.add, color: Colors.white54),
-      _CalculatorOperations.equals.name: const Icon(CustomIcons.equals, size: 18, color: Colors.white54),
+      '.': const Text('.',
+          style: TextStyle(fontSize: 30, color: Colors.white54)),
+      _CalculatorOperations.delete.name:
+          const Icon(Icons.backspace, size: 18, color: Colors.white60),
+      _CalculatorOperations.divide.name:
+          const Icon(CustomIcons.divide, size: 18, color: Colors.white54),
+      _CalculatorOperations.multiply.name:
+          const Icon(Icons.close_sharp, color: Colors.white54),
+      _CalculatorOperations.subtract.name:
+          const Icon(Icons.remove, color: Colors.white54),
+      _CalculatorOperations.plus.name:
+          const Icon(Icons.add, color: Colors.white54),
+      _CalculatorOperations.equals.name:
+          const Icon(CustomIcons.equals, size: 18, color: Colors.white54),
     });
 
-  const CalculatorButton({super.key, required this.value, required this.onPressed});
+  const CalculatorButton(
+      {super.key, required this.value, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -248,8 +271,11 @@ class CalculatorButton extends StatelessWidget {
           onPressed(value);
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: _CalculatorOperationsExt.isArithmeticOperation(value) && value != _CalculatorOperations.delete.name ?
-            Theme.of(context).colorScheme.background : Colors.black12,
+          backgroundColor:
+              _CalculatorOperationsExt.isArithmeticOperation(value) &&
+                      value != _CalculatorOperations.delete.name
+                  ? Theme.of(context).colorScheme.background
+                  : Colors.black12,
           shape: const BeveledRectangleBorder(side: BorderSide.none),
         ),
         child: _valueToIcon[value],
@@ -258,12 +284,14 @@ class CalculatorButton extends StatelessWidget {
   }
 }
 
-enum _CalculatorOperations { delete, divide, multiply, subtract, plus, equals}
+enum _CalculatorOperations { delete, divide, multiply, subtract, plus, equals }
 
 extension _CalculatorOperationsExt on _CalculatorOperations {
-  static final Set<String> _operationNames = _CalculatorOperations.values.map((o) => o.name).toSet();
+  static final Set<String> _operationNames =
+      _CalculatorOperations.values.map((o) => o.name).toSet();
 
   static bool isArithmeticOperation(String operationName) {
-    return _operationNames.contains(operationName) && operationName != _CalculatorOperations.delete.name;
+    return _operationNames.contains(operationName) &&
+        operationName != _CalculatorOperations.delete.name;
   }
 }

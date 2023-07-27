@@ -14,7 +14,6 @@ class AddExpenseRoute extends StatefulWidget {
 }
 
 class _AddExpenseState extends State<AddExpenseRoute> {
-
   late Calculator _calculator;
   late TextEditingController _descriptionController;
   late Future<CategoryEntry> _category;
@@ -24,8 +23,8 @@ class _AddExpenseState extends State<AddExpenseRoute> {
   String _displayedAmount = "0";
 
   Future<CategoryEntry> _initCategory() async {
-    return (await ExpenseDatabase.instance.getCategories())
-        .firstWhere((CategoryEntry e) => e.id == widget.entry?.categoryId,
+    return (await ExpenseDatabase.instance.getCategories()).firstWhere(
+        (CategoryEntry e) => e.id == widget.entry?.categoryId,
         orElse: () => ExpenseDatabase.nullCategory);
   }
 
@@ -40,9 +39,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
     _descriptionController =
         TextEditingController(text: widget.entry?.description);
     _displayedDate = DateTime.fromMillisecondsSinceEpoch(
-        widget.entry?.msSinceEpoch ?? DateTime
-            .now()
-            .millisecondsSinceEpoch);
+        widget.entry?.msSinceEpoch ?? DateTime.now().millisecondsSinceEpoch);
     _displayedTime = TimeOfDay.fromDateTime(_displayedDate);
     super.initState();
   }
@@ -66,11 +63,10 @@ class _AddExpenseState extends State<AddExpenseRoute> {
     return _descriptionController.value.text;
   }
 
-
   int _getDisplayedDateTimeInMs() {
-    return DateTime(
-        _displayedDate.year, _displayedDate.month, _displayedDate.day,
-        _displayedTime.hour, _displayedTime.minute).millisecondsSinceEpoch;
+    return DateTime(_displayedDate.year, _displayedDate.month,
+            _displayedDate.day, _displayedTime.hour, _displayedTime.minute)
+        .millisecondsSinceEpoch;
   }
 
   Future<ExpenseEntry> _createExpense(double finalAmount, {int? id}) async {
@@ -103,8 +99,8 @@ class _AddExpenseState extends State<AddExpenseRoute> {
     } else {
       return Future.delayed(Duration.zero, () async {
         ExpenseEntry oldEntry = widget.entry!;
-        ExpenseEntry newEntry = await _createExpense(
-            finalAmount, id: oldEntry.id);
+        ExpenseEntry newEntry =
+            await _createExpense(finalAmount, id: oldEntry.id);
         if (oldEntry != newEntry) {
           int status = await ExpenseDatabase.instance.updateExpense(newEntry);
           if (status == 0) {
@@ -175,26 +171,20 @@ class _AddExpenseState extends State<AddExpenseRoute> {
               CategoryEntry entry = snapshot.data!;
               text = entry.name;
             }
-            return Text(text, style: TextStyle(color: Theme
-                .of(context)
-                .colorScheme
-                .onPrimary, fontSize: 17));
+            return Text(text,
+                style: TextStyle(
+                    color: Theme.of(context).primaryColorDark, fontSize: 17));
           } else {
-            return Text('', style: TextStyle(color: Theme
-                .of(context)
-                .colorScheme
-                .onPrimary, fontSize: 17));
+            return Text('',
+                style: TextStyle(
+                    color: Theme.of(context).primaryColorDark, fontSize: 17));
           }
-        }
-    );
+        });
   }
 
   Widget _currentAmountDisplay(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(color: Theme
-          .of(context)
-          .colorScheme
-          .primaryContainer),
+      decoration: BoxDecoration(color: Theme.of(context).primaryColorLight),
       padding: const EdgeInsets.all(16),
       child: Stack(
         children: [
@@ -203,13 +193,12 @@ class _AddExpenseState extends State<AddExpenseRoute> {
             right: 20,
             child: FittedBox(
               fit: BoxFit.fitWidth,
-              child: Text(_displayedAmount, style: TextStyle(
-                  color: Theme
-                      .of(context)
-                      .colorScheme
-                      .onPrimary,
-                  fontSize: 58,
-                  fontWeight: FontWeight.bold),
+              child: Text(
+                _displayedAmount,
+                style: TextStyle(
+                    color: Theme.of(context).primaryColorDark,
+                    fontSize: 58,
+                    fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -226,10 +215,9 @@ class _AddExpenseState extends State<AddExpenseRoute> {
                   children: [
                     Text(
                       'Category',
-                      style: TextStyle(color: Theme
-                          .of(context)
-                          .colorScheme
-                          .onPrimary, fontSize: 14),
+                      style: TextStyle(
+                          color: Theme.of(context).primaryColorDark,
+                          fontSize: 14),
                     ),
                     _getCategoryName(context),
                   ],
@@ -245,18 +233,12 @@ class _AddExpenseState extends State<AddExpenseRoute> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.calendar_today, color: Theme
-                      .of(context)
-                      .colorScheme
-                      .onPrimary),
+                  Icon(Icons.calendar_today,
+                      color: Theme.of(context).primaryColorDark),
                   const SizedBox(width: 8),
                   Text(
-                    '${_twoDigits(_displayedDate.day)}-${_twoDigits(
-                        _displayedDate.month)}-${_displayedDate.year}',
-                    style: TextStyle(color: Theme
-                        .of(context)
-                        .colorScheme
-                        .onPrimary),
+                    '${_twoDigits(_displayedDate.day)}-${_twoDigits(_displayedDate.month)}-${_displayedDate.year}',
+                    style: TextStyle(color: Theme.of(context).primaryColorDark),
                   ),
                 ],
               ),
@@ -270,18 +252,12 @@ class _AddExpenseState extends State<AddExpenseRoute> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.timelapse, color: Theme
-                      .of(context)
-                      .colorScheme
-                      .onPrimary),
+                  Icon(Icons.timelapse,
+                      color: Theme.of(context).primaryColorDark),
                   const SizedBox(width: 8),
                   Text(
-                    '${_twoDigits(_displayedTime.hour)}:${_twoDigits(
-                        _displayedTime.minute)}',
-                    style: TextStyle(color: Theme
-                        .of(context)
-                        .colorScheme
-                        .onPrimary),
+                    '${_twoDigits(_displayedTime.hour)}:${_twoDigits(_displayedTime.minute)}',
+                    style: TextStyle(color: Theme.of(context).primaryColorDark),
                   ),
                 ],
               ),
@@ -296,21 +272,15 @@ class _AddExpenseState extends State<AddExpenseRoute> {
               showCursor: false,
               decoration: InputDecoration(
                 labelText: 'Description',
-                floatingLabelStyle: TextStyle(color: Theme
-                    .of(context)
-                    .colorScheme
-                    .onPrimary, fontSize: 19),
-                labelStyle: TextStyle(color: Theme
-                    .of(context)
-                    .colorScheme
-                    .onPrimary, fontSize: 17),
+                floatingLabelStyle: TextStyle(
+                    color: Theme.of(context).primaryColorDark, fontSize: 19),
+                labelStyle: TextStyle(
+                    color: Theme.of(context).primaryColorDark, fontSize: 17),
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
               ),
-              style: TextStyle(color: Theme
-                  .of(context)
-                  .colorScheme
-                  .onPrimary, fontSize: 17),
+              style: TextStyle(
+                  color: Theme.of(context).primaryColorDark, fontSize: 17),
               controller: _descriptionController,
             ),
           ),
@@ -336,7 +306,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
             onPressed: () => Navigator.of(context).pop(),
           ),
           actions: [
-            if (widget.entry != null)...[
+            if (widget.entry != null) ...[
               IconButton(
                 icon: const Icon(Icons.delete),
                 onPressed: () async {

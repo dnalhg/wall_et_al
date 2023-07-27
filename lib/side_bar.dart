@@ -10,25 +10,19 @@ class SideBar extends StatelessWidget {
         child: ListView(
       padding: EdgeInsets.zero,
       children: <Widget>[
-         SizedBox(
+        SizedBox(
             height: 150,
             child: DrawerHeader(
-              decoration: const BoxDecoration(
-                color: Colors.blue,
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColorLight,
               ),
               padding: Constants.DEFAULT_EDGE_INSETS,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
-                children: const [
-                  Text(
-                    Constants.APP_NAME,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: Constants.LARGE_TEXT_FONT_SIZE,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                children: [
+                  Text(Constants.APP_NAME,
+                      style: Theme.of(context).primaryTextTheme.titleLarge),
                 ],
               ),
             )),
@@ -45,9 +39,9 @@ class SideBar extends StatelessWidget {
           title: const Text('Categories'),
           onTap: () {
             Navigator.pop(context);
-            Navigator.pushReplacementNamed(context, Constants.CATEGORIES_PAGE_ROUTE);
-
-            },
+            Navigator.pushReplacementNamed(
+                context, Constants.CATEGORIES_PAGE_ROUTE);
+          },
         ),
       ],
     ));

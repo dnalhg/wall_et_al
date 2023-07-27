@@ -8,5 +8,4 @@ class Constants {
   static const EdgeInsets DEFAULT_EDGE_INSETS = EdgeInsets.all(16.0);
 
   static const String CATEGORIES_PAGE_ROUTE = "/categories";
-
 }

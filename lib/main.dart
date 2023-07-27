@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:wall_et_al/add_categories.dart';
 import 'package:wall_et_al/constants.dart';
+import 'package:wall_et_al/notifiers.dart';
 import 'package:wall_et_al/side_bar.dart';
 import 'package:wall_et_al/wallet_app_bar.dart';
 
@@ -8,9 +10,17 @@ import 'add_expense.dart';
 import 'cost_breakdown.dart';
 import 'filter_bar.dart';
 
+// TODO's
+// Fix this god forsaken filter bar thing
+// ANIIMATIONS BETWEEN PAGES
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider(create: (_) => TimeFilter()),
+    ChangeNotifierProvider(create: (_) => ExcludeCategories()),
+    ChangeNotifierProvider(create: (_) => ExpenseTotal())
+  ], child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -20,11 +30,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: Constants.APP_NAME,
-      theme: ThemeData(brightness: Brightness.dark),
+      theme: ThemeData(brightness: Brightness.dark, useMaterial3: true),
       home: const Main(),
-      routes: {
-        Constants.CATEGORIES_PAGE_ROUTE: (context) => AddCategoryPage()
-      },
+      routes: {Constants.CATEGORIES_PAGE_ROUTE: (context) => AddCategoryPage()},
     );
   }
 }
@@ -35,25 +43,9 @@ class Main extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _MainState();
 }
-class _MainState extends State<Main>{
 
+class _MainState extends State<Main> {
   bool _expandedBottomBar = false;
-  bool _forceUpdate = true;
-  String _timeFilter = FilterBar.getDefaultTimeFilterString();
-  List<Widget>? _actions;
-
-  void _updateAppBar(List<Widget> actions) {
-    setState(() {
-      _actions = actions;
-    });
-  }
-
-  void _updateTimeFilter(String timeFilter) {
-    setState(() {
-      _timeFilter = timeFilter;
-      _forceUpdate = true;
-    });
-  }
 
   void _toggleExpansion() {
     setState(() {
@@ -67,15 +59,13 @@ class _MainState extends State<Main>{
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const AddExpenseRoute()),
-    ).then((val) => setState(() {
-        _forceUpdate = true;
-      }));
+    ).then((val) => setState(() {}));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: WalletAppBar(title: Constants.APP_NAME, actions: _actions),
+      appBar: WalletAppBar(title: Constants.APP_NAME),
       // create a side menu using Drawer widget
       drawer: const SideBar(),
       body: Stack(children: [
@@ -85,26 +75,27 @@ class _MainState extends State<Main>{
               _toggleExpansion();
             }
           },
-          child: CostBreakdown(
-              timeFilter: _timeFilter,
-              forceUpdate: _forceUpdate,
-              onUpdate: () {
-                _forceUpdate = false;
-              },
-              updateAppBar: _updateAppBar
-          ),
+          child: const CostBreakdown(),
         ),
-        Align(alignment: Alignment.bottomCenter, child: FilterBar(onExpand: _toggleExpansion, getExpansionState: _getExpansionState, updateTimeFilter: _updateTimeFilter)),
+        Align(
+            alignment: Alignment.bottomCenter,
+            child: FilterBar(
+              onExpand: _toggleExpansion,
+              getExpansionState: _getExpansionState,
+            )),
       ]),
-      floatingActionButton: _expandedBottomBar ? null : Padding(
-        padding: const EdgeInsets.only(bottom: 75),
-        child: FloatingActionButton(
-            onPressed: () => _navigateToAddExpenseRoute(context),
-            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-            tooltip: 'Add new expense',
-            child: Icon(Icons.add, color: Theme.of(context).colorScheme.onPrimary),
-          ),
-      ),
+      floatingActionButton: _expandedBottomBar
+          ? null
+          : Padding(
+              padding: const EdgeInsets.only(bottom: 75),
+              child: FloatingActionButton(
+                onPressed: () => _navigateToAddExpenseRoute(context),
+                backgroundColor: Theme.of(context).primaryColorLight,
+                tooltip: 'Add new expense',
+                child:
+                    Icon(Icons.add, color: Theme.of(context).primaryColorDark),
+              ),
+            ),
     );
   }
 }

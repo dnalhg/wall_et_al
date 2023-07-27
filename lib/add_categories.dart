@@ -5,7 +5,6 @@ import 'package:wall_et_al/list_item_modal.dart';
 import 'package:wall_et_al/side_bar.dart';
 import 'package:wall_et_al/wallet_app_bar.dart';
 
-
 class AddCategoryPage extends StatefulWidget {
   final Future<CategoryEntry>? chosen;
 
@@ -35,7 +34,8 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
         return;
       }
       _openAddListItemModal((name, color, icon) {
-        _updateCategory(CategoryEntry(name: name, icon: icon, color: color, id: entry.id));
+        _updateCategory(
+            CategoryEntry(name: name, icon: icon, color: color, id: entry.id));
       }, entry);
     } else if (widget.chosen != null) {
       Navigator.of(context).pop(entry);
@@ -62,15 +62,19 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: WalletAppBar(title: Constants.CATEGORIES_PAGE_TITlE, actions: [
-        IconButton(
-          icon: Icon(_isEditing ? Icons.check : Icons.edit),
-          onPressed: _handleEditPress,
-        ),
-      ], showMenuButton: widget.chosen == null),
+      appBar: WalletAppBar(
+          title: Constants.CATEGORIES_PAGE_TITlE,
+          actions: [
+            IconButton(
+              icon: Icon(_isEditing ? Icons.check : Icons.edit),
+              onPressed: _handleEditPress,
+            ),
+          ],
+          showMenuButton: widget.chosen == null),
       drawer: const SideBar(),
       body: FutureBuilder<List<dynamic>>(
-        future: Future.wait([_categoriesFuture, widget.chosen ?? Future.value(null)]),
+        future: Future.wait(
+            [_categoriesFuture, widget.chosen ?? Future.value(null)]),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final List<CategoryEntry> categories = snapshot.data![0];
@@ -82,14 +86,15 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
               itemBuilder: (context, index) {
                 CategoryEntry entry = categories[index];
                 return Card(
-                  shape: chosen?.id == entry.id ? RoundedRectangleBorder(side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 4)) : null,
-
                   child: ListTile(
                     tileColor: entry.color,
                     leading: Icon(entry.icon),
                     title: Text(entry.name),
                     trailing: _buildCategoryDeletionButton(entry),
-                    onTap: _isEditing || widget.chosen != null ? () => _handleTileTap(context, entry) : null,
+                    selected: chosen?.id == entry.id,
+                    onTap: _isEditing || widget.chosen != null
+                        ? () => _handleTileTap(context, entry)
+                        : null,
                   ),
                 );
               },
@@ -103,15 +108,17 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
       ),
       floatingActionButton: _isEditing
           ? FloatingActionButton(
-              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              backgroundColor: Theme.of(context).primaryColorLight,
               onPressed: () {
                 _openAddListItemModal((name, color, icon) {
                   setState(() {
-                    _addCategory(CategoryEntry(name: name, color: color, icon: icon));
+                    _addCategory(
+                        CategoryEntry(name: name, color: color, icon: icon));
                   });
                 }, null);
               },
-              child: Icon(Icons.add, color: Theme.of(context).colorScheme.onPrimary),
+              child: Icon(Icons.add,
+                  color: Theme.of(context).colorScheme.onPrimary),
             )
           : null,
     );
@@ -153,6 +160,5 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
       _categoriesFuture = _loadCategories();
       _isEditing = !_isEditing;
     });
-
   }
 }

@@ -9,7 +9,8 @@ class ExpenseDatabase {
   static const String _expenseTableName = 'expenses';
   static const String _categoriesTableName = 'categories';
 
-  static final CategoryEntry nullCategory = CategoryEntry(name: "None", icon: Icons.do_disturb_alt_sharp, color: Colors.red, id: 1);
+  static final CategoryEntry nullCategory = CategoryEntry(
+      name: "None", icon: Icons.do_disturb_alt_sharp, color: Colors.red, id: 1);
 
   static ExpenseDatabase instance = ExpenseDatabase();
 
@@ -27,8 +28,7 @@ class ExpenseDatabase {
             color INTEGER NOT NULL
           )
         ''');
-        await db.execute(
-            '''
+        await db.execute('''
             CREATE TABLE $_expenseTableName(
               id INTEGER PRIMARY KEY AUTOINCREMENT,
               amount REAL,
@@ -37,8 +37,7 @@ class ExpenseDatabase {
               category_id INTEGER NOT NULL,
               FOREIGN KEY (category_id) REFERENCES categories(id)
             )
-            '''
-        );
+            ''');
         await db.insert(_categoriesTableName, nullCategory.toMap());
       },
       version: 1,
@@ -58,31 +57,37 @@ class ExpenseDatabase {
   Future<int> updateExpense(ExpenseEntry e) async {
     final db = await _database;
 
-    return await db.update(
-        _expenseTableName, e.toMap(), where: 'id = ?', whereArgs: [e.id]);
+    return await db.update(_expenseTableName, e.toMap(),
+        where: 'id = ?', whereArgs: [e.id]);
   }
 
   Future<int> removeExpense(ExpenseEntry e) async {
     final db = await _database;
 
-    return await db.delete(
-        _expenseTableName, where: 'id = ?', whereArgs: [e.id]);
+    return await db
+        .delete(_expenseTableName, where: 'id = ?', whereArgs: [e.id]);
   }
 
   /// [timeFilter] is a string of the format 'startTime-endTime' where startTime
   /// is inclusive and endTime is exclusive
-  Future<List<ExpenseEntry>> getExpenses({String? timeFilter}) async {
+  Future<List<ExpenseEntry>> getExpenses(
+      {String? timeFilter, Set<int>? excludeCategories}) async {
     if (timeFilter == null) return [];
+    excludeCategories ??= {};
     final db = await _database;
     List<String> timeRange = timeFilter.split('-');
     String startTime = timeRange.first;
     String endTime = timeRange.last;
+    String placeholders =
+        List<String>.filled(excludeCategories.length, '?').join(',');
     Future<List<Map<String, Object?>>> queryResult = db.query(
-        _expenseTableName,
-        where: 'ms_since_epoch >= ? AND ms_since_epoch < ?',
-        whereArgs: [startTime, endTime],
+      _expenseTableName,
+      where:
+          'ms_since_epoch >= ? AND ms_since_epoch < ? AND category_id NOT IN ($placeholders)',
+      whereArgs: [startTime, endTime, ...excludeCategories.toList()],
     );
-    List<ExpenseEntry> expenses = (await queryResult).map((m) => ExpenseEntry.fromMap(m)).toList();
+    List<ExpenseEntry> expenses =
+        (await queryResult).map((m) => ExpenseEntry.fromMap(m)).toList();
     expenses.sort((e1, e2) => e1.msSinceEpoch.compareTo(e2.msSinceEpoch) * -1);
     return expenses;
   }
@@ -99,21 +104,25 @@ class ExpenseDatabase {
   Future<int> updateCategory(CategoryEntry e) async {
     final db = await _database;
 
-    return await db.update(
-        _categoriesTableName, e.toMap(), where: 'id = ?', whereArgs: [e.id]);
+    return await db.update(_categoriesTableName, e.toMap(),
+        where: 'id = ?', whereArgs: [e.id]);
   }
 
   Future<int> removeCategory(CategoryEntry e) async {
     final db = await _database;
-
-    return await db.delete(
-        _categoriesTableName, where: 'id = ?', whereArgs: [e.id]);
+    await db.rawUpdate(
+      'UPDATE expenses SET category_id = ? WHERE category_id = ?',
+      [1, e.id],
+    );
+    return await db
+        .delete(_categoriesTableName, where: 'id = ?', whereArgs: [e.id]);
   }
 
   Future<List<CategoryEntry>> getCategories() async {
     final db = await _database;
-    return (await db.query(_categoriesTableName)).map((m) =>
-        CategoryEntry.fromMap(m)).toList();
+    return (await db.query(_categoriesTableName))
+        .map((m) => CategoryEntry.fromMap(m))
+        .toList();
   }
 }
 
@@ -123,7 +132,8 @@ class CategoryEntry {
   final IconData icon;
   final Color color;
 
-  CategoryEntry({required this.name, required this.icon, required this.color, int? id}) {
+  CategoryEntry(
+      {required this.name, required this.icon, required this.color, int? id}) {
     if (id != null) {
       this.id = id;
     }
@@ -131,18 +141,17 @@ class CategoryEntry {
 
   factory CategoryEntry.fromMap(Map<String, dynamic> m) {
     return CategoryEntry(
-      id: m['id'],
-      name: m['name'],
-      icon: IconData(m['icon'], fontFamily: "MaterialIcons"),
-      color: Color(m['color'])
-    );
+        id: m['id'],
+        name: m['name'],
+        icon: IconData(m['icon'], fontFamily: "MaterialIcons"),
+        color: Color(m['color']));
   }
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> res = {
-      'name' : name,
-      'icon' : icon.codePoint,
-      'color' : color.value,
+      'name': name,
+      'icon': icon.codePoint,
+      'color': color.value,
     };
     if (id != null) {
       res['id'] = id;
@@ -169,7 +178,6 @@ class CategoryEntry {
   int get hashCode =>
       id.hashCode ^ name.hashCode ^ icon.hashCode ^ color.hashCode;
 }
-
 
 class ExpenseEntry {
   final int? id;
@@ -219,8 +227,10 @@ class ExpenseEntry {
     if (other is! ExpenseEntry) {
       return false;
     }
-    return other.id == id && other.amount == amount &&
-        other.msSinceEpoch == msSinceEpoch && other.categoryId == categoryId
-        && other.description == description;
+    return other.id == id &&
+        other.amount == amount &&
+        other.msSinceEpoch == msSinceEpoch &&
+        other.categoryId == categoryId &&
+        other.description == description;
   }
 }
