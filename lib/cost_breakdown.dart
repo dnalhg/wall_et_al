@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:wall_et_al/expense_pie_chart.dart';
 import 'package:wall_et_al/routes.dart';
 
 import 'add_expense.dart';
@@ -97,9 +98,19 @@ class _CostBreakdownState extends State<CostBreakdown> {
             _categories = snapshot.data![1] as List<CategoryEntry>;
             return ListView.builder(
               padding: const EdgeInsets.only(bottom: 150.0),
-              itemCount: entries.length,
-              itemBuilder: (context, idx) =>
-                  _createExpenseView(context, entries[idx]),
+              itemCount: entries.length + 1,
+              itemBuilder: (context, idx) {
+                if (idx == 0) {
+                  return Card(
+                    margin: EdgeInsets.all(15),
+                    color: Theme.of(context).colorScheme.secondaryContainer,
+                    child: ExpensePieChart(expenses: entries, categories: _categories),
+                  );
+                } else {
+                  return _createExpenseView(context, entries[idx - 1]);
+                }
+
+              }
             );
           } else if (snapshot.hasError) {
             return Text('Error: ${snapshot.error}');

@@ -12,9 +12,7 @@ import 'database.dart';
 import 'filter_bar.dart';
 
 // TODO's
-// Fix this god forsaken filter bar thing
-// ANIIMATIONS BETWEEN PAGES
-// Convert cost breakdown into stateless OR use providers instead
+// swipe to delete
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,6 +34,7 @@ class MyApp extends StatelessWidget {
       brightness: Brightness.dark,
       primary: const Color(0xff477388),
     );
+
     return MaterialApp(
       title: Constants.APP_NAME,
       theme: ThemeData(

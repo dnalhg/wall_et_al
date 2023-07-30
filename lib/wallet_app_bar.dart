@@ -23,7 +23,12 @@ class _WalletAppBarState extends State<WalletAppBar> {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: Text(widget.title),
+      title: Transform.translate(
+          offset: Offset(-25, 0),
+          child: Row(children: [
+            Image.asset(width: 50, 'assets/logo.png'),
+            Text(widget.title)
+          ])),
       // add a side menu button to the app bar
       automaticallyImplyLeading: false,
       leading: widget.showMenuButton

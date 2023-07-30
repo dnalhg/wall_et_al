@@ -16,20 +16,38 @@ class _ListItemModalState extends State<ListItemModal> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _textController;
   late Color _selectedColor;
+  Color? _colorPickerSelectedColor;
   late IconData _icon;
   bool _isButtonEnabled = false;
+  bool _isDropdownVisible = true;
 
   final List<IconData> _icons = [
-    Icons.shopping_cart,
-    Icons.work,
-    Icons.school,
-    Icons.restaurant,
-    Icons.directions_run,
+    Icons.local_atm,
+    Icons.fastfood,
     Icons.local_gas_station,
-    Icons.hotel,
+    Icons.train,
+    Icons.home,
+    Icons.shopping_cart,
+    Icons.beach_access,
+    Icons.local_hospital,
+    Icons.apple,
+    Icons.fitness_center,
+    Icons.card_giftcard,
+    Icons.school,
     Icons.local_movies,
-    Icons.local_activity,
-    Icons.music_note
+    Icons.laptop_chromebook,
+  ];
+
+  final List<Color> colorPalette = [
+    const Color(0xffDF7861),
+    const Color(0xffF9D657),
+    const Color(0xff364F6B),
+    const Color(0xff008891),
+    const Color(0xff3FC1C9),
+    const Color(0xffFC5185),
+    const Color(0xff161D6F),
+    const Color(0xff7FFF97),
+    const Color(0xffFFD25A),
   ];
 
   @override
@@ -37,7 +55,10 @@ class _ListItemModalState extends State<ListItemModal> {
     super.initState();
     _textController = TextEditingController(text: widget.category?.name ?? '');
     _textController.addListener(_onTextChanged);
-    _selectedColor = widget.category?.color ?? Colors.blue;
+    _selectedColor = widget.category?.color ?? colorPalette[0];
+    if (!colorPalette.contains(_selectedColor)) {
+      _colorPickerSelectedColor = _selectedColor;
+    }
     _icon = widget.category?.icon ?? _icons.first;
   }
 
@@ -58,35 +79,46 @@ class _ListItemModalState extends State<ListItemModal> {
     Navigator.of(context).pop();
   }
 
-  void _selectColor() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Select a color'),
-          content: SingleChildScrollView(
-            child: ColorPicker(
-              pickerColor: _selectedColor,
-              onColorChanged: (Color color) {
-                setState(() {
-                  _selectedColor = color;
-                });
+  void _selectColor() async {
+    setState(() {
+      _isDropdownVisible = false;
+    });
+    Future.delayed(const Duration(milliseconds: 100))
+        .then((value) => showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text('Select a color'),
+                  content: SingleChildScrollView(
+                    child: ColorPicker(
+                      pickerColor: _colorPickerSelectedColor ?? Colors.red,
+                      onColorChanged: (Color color) {
+                        setState(() {
+                          _colorPickerSelectedColor = color;
+                        });
+                      },
+                      labelTypes: const [],
+                      pickerAreaHeightPercent: 0.8,
+                    ),
+                  ),
+                  actions: <Widget>[
+                    TextButton(
+                      child: const Text('OK'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        Navigator.of(context).pop();
+                        if (_colorPickerSelectedColor != null) {
+                          setState(() {
+                            _selectedColor = _colorPickerSelectedColor!;
+                            _isDropdownVisible = true;
+                          });
+                        }
+                      },
+                    ),
+                  ],
+                );
               },
-              labelTypes: const [],
-              pickerAreaHeightPercent: 0.8,
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+            ));
   }
 
   @override
@@ -99,15 +131,41 @@ class _ListItemModalState extends State<ListItemModal> {
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             Row(
               children: [
-                IconButton(
-                  onPressed: _selectColor,
-                  icon: const Icon(Icons.color_lens_rounded),
-                  color: _selectedColor,
-                ),
                 Expanded(
                   child: TextFormField(
                     controller: _textController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
+                      prefixIcon: _isDropdownVisible
+                          ? DropdownButtonHideUnderline(
+                              child: DropdownButton<Color>(
+                              hint: Text(''),
+                              value: _selectedColor,
+                              onChanged: (Color? value) {
+                                if (!colorPalette.contains(value)) {
+                                  _selectColor();
+                                } else {
+                                  setState(() => _selectedColor = value!);
+                                }
+                              },
+                              items: colorPalette
+                                  .map<DropdownMenuItem<Color>>((Color value) {
+                                return DropdownMenuItem<Color>(
+                                  value: value,
+                                  child: Container(
+                                    width: 20,
+                                    height: 20,
+                                    color: value,
+                                  ),
+                                );
+                              }).toList()
+                                ..add(DropdownMenuItem(
+                                  onTap: _selectColor,
+                                  value: _colorPickerSelectedColor,
+                                  child: Icon(Icons.color_lens,
+                                      color: _colorPickerSelectedColor),
+                                )),
+                            ))
+                          : Text(''),
                       labelText: 'Text',
                     ),
                     validator: (value) {

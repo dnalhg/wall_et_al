@@ -10,7 +10,7 @@ class ExpenseDatabase with ChangeNotifier {
   static const String _categoriesTableName = 'categories';
 
   static final CategoryEntry nullCategory = CategoryEntry(
-      name: "None", icon: Icons.do_disturb_alt_sharp, color: Colors.red, id: 1);
+      name: "Other", icon: Icons.do_disturb_alt_sharp, color: Colors.red, id: 1);
 
   static ExpenseDatabase instance = ExpenseDatabase();
 

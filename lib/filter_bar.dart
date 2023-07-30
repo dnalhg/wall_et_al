@@ -208,7 +208,7 @@ class _FilterBarState extends State<FilterBar> {
                   child: Text("Unselect All",
                       style: Theme.of(context).primaryTextTheme.bodyMedium))
             ]),
-            Container(
+            SizedBox(
               height: 100,
               child: Padding(
                   padding: const EdgeInsets.only(top: 5.0, left: 15, right: 15),
@@ -270,12 +270,13 @@ class _FilterBarState extends State<FilterBar> {
           ]
         : [];
 
-    return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-              Expanded(flex: 0, child: _buildTimeFilter(context))
-            ] +
-            widgets);
+    return SingleChildScrollView(
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+                  Expanded(flex: 0, child: _buildTimeFilter(context))
+                ] +
+                widgets));
   }
 
   Widget _buildTimeFilter(BuildContext context) {
@@ -326,6 +327,13 @@ class _FilterBarState extends State<FilterBar> {
   static const double _toggleButtonHeight = 40;
   static const double _containerHeight = 70;
 
+  double _getHeight() {
+    if (_isExpanded()) {
+      return 250;
+    }
+    return _containerHeight + _toggleButtonHeight / 2;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -333,55 +341,60 @@ class _FilterBarState extends State<FilterBar> {
         shadowColor: Colors.white,
         borderOnForeground: false,
         color: Colors.transparent,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Positioned(
-              child: Container(
-                height: _isExpanded()
-                    ? 300
-                    : _containerHeight + _toggleButtonHeight / 2,
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                ),
-                padding: const EdgeInsets.only(top: _toggleButtonHeight / 2),
+        child: GestureDetector(
+          onVerticalDragUpdate: (dragUpdate) {
+            if (!_isExpanded() && dragUpdate.delta.dy < 0) {
+              widget.onExpand();
+            } else if (_isExpanded() && dragUpdate.delta.dy > 0) {
+              widget.onExpand();
+            }
+          },
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Positioned(
                 child: AnimatedContainer(
-                  duration: _animationTime,
-                  height: _isExpanded() ? 200 : _containerHeight,
-                  color: Theme.of(context).colorScheme.primary,
-                  curve: Curves.easeInOutSine,
-                  child: _buildFilterInternals(context),
+                  height: _getHeight(),
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                  ),
+                  padding: const EdgeInsets.only(top: _toggleButtonHeight / 2),
+                  duration: Duration(milliseconds: 300),
+                  child: Container(
+                    color: Theme.of(context).colorScheme.primary,
+                    child: _buildFilterInternals(context),
+                  ),
                 ),
               ),
-            ),
-            Positioned(
-              top: 0,
-              child: GestureDetector(
-                onTap: () => widget.onExpand(),
-                child: AnimatedContainer(
-                  duration: _animationTime,
-                  height: _toggleButtonHeight,
-                  width: 100,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                    shape: BoxShape.rectangle,
-                    borderRadius: const BorderRadius.all(
-                        Radius.circular(_toggleButtonHeight / 2)),
-                  ),
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.only(bottom: _toggleButtonHeight / 3),
-                    child: Icon(
-                      _isExpanded()
-                          ? Icons.keyboard_arrow_down
-                          : Icons.keyboard_arrow_up,
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+              Positioned(
+                top: 0,
+                child: GestureDetector(
+                  onTap: () => widget.onExpand(),
+                  child: AnimatedContainer(
+                    duration: _animationTime,
+                    height: _toggleButtonHeight,
+                    width: 100,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary,
+                      shape: BoxShape.rectangle,
+                      borderRadius: const BorderRadius.all(
+                          Radius.circular(_toggleButtonHeight / 2)),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                          bottom: _toggleButtonHeight / 3),
+                      child: Icon(
+                        _isExpanded()
+                            ? Icons.keyboard_arrow_down
+                            : Icons.keyboard_arrow_up,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ));
   }
 }
