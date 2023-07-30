@@ -193,6 +193,8 @@ class _FilterBarState extends State<FilterBar> {
                   onPressed: () {
                     updateCategories({});
                   },
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.onPrimary),
                   child: Text("Select All",
                       style: Theme.of(context).primaryTextTheme.bodyMedium)),
               ElevatedButton(
@@ -201,6 +203,8 @@ class _FilterBarState extends State<FilterBar> {
                         await ExpenseDatabase.instance.getCategories();
                     updateCategories(categories.map((e) => e.id!).toSet());
                   },
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.onPrimary),
                   child: Text("Unselect All",
                       style: Theme.of(context).primaryTextTheme.bodyMedium))
             ]),
@@ -226,6 +230,12 @@ class _FilterBarState extends State<FilterBar> {
                                     padding: const EdgeInsets.only(
                                         left: 5, right: 5),
                                     child: FilterChip(
+                                        selectedColor: Theme.of(context)
+                                            .colorScheme
+                                            .secondary,
+                                        backgroundColor: Theme.of(context)
+                                            .colorScheme
+                                            .onPrimary,
                                         label: Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
@@ -274,17 +284,24 @@ class _FilterBarState extends State<FilterBar> {
       children: [
         IconButton(
           icon: Icon(Icons.chevron_left,
-              color: Theme.of(context).primaryColorDark),
+              color: Theme.of(context).colorScheme.onPrimaryContainer),
           onPressed: () => _incrementCurrentTimePeriod(false),
         ),
         PopupMenuButton<_TimeFilterGranularity>(
             itemBuilder: (BuildContext context) {
               return _menuItems.map((_TimeFilterGranularity item) {
                 return PopupMenuItem<_TimeFilterGranularity>(
-                  value: item,
-                  child: Text("This ${item.name}",
-                      style: Theme.of(context).primaryTextTheme.bodyMedium),
-                );
+                    value: item,
+                    child: Text(
+                      "This ${item.name}",
+                      style: Theme.of(context)
+                          .primaryTextTheme
+                          .bodyMedium
+                          ?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSecondaryContainer),
+                    ));
               }).toList();
             },
             onSelected: _selectNewTimeGranularity,
@@ -299,7 +316,7 @@ class _FilterBarState extends State<FilterBar> {
             )),
         IconButton(
           icon: Icon(Icons.chevron_right,
-              color: Theme.of(context).primaryColorDark),
+              color: Theme.of(context).colorScheme.onPrimaryContainer),
           onPressed: () => _incrementCurrentTimePeriod(true),
         ),
       ],
@@ -311,54 +328,60 @@ class _FilterBarState extends State<FilterBar> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        Positioned(
-          child: Container(
-            height: _isExpanded()
-                ? 300
-                : _containerHeight + _toggleButtonHeight / 2,
-            decoration: const BoxDecoration(
-              color: Colors.transparent,
-            ),
-            padding: const EdgeInsets.only(top: _toggleButtonHeight / 2),
-            child: AnimatedContainer(
-              duration: _animationTime,
-              height: _isExpanded() ? 200 : _containerHeight,
-              color: Theme.of(context).primaryColorLight,
-              curve: Curves.easeInOutSine,
-              child: _buildFilterInternals(context),
-            ),
-          ),
-        ),
-        Positioned(
-          top: 0,
-          child: GestureDetector(
-            onTap: () => widget.onExpand(),
-            child: AnimatedContainer(
-              duration: _animationTime,
-              height: _toggleButtonHeight,
-              width: 100,
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColorLight,
-                shape: BoxShape.rectangle,
-                borderRadius: const BorderRadius.all(
-                    Radius.circular(_toggleButtonHeight / 2)),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: _toggleButtonHeight / 3),
-                child: Icon(
-                  _isExpanded()
-                      ? Icons.keyboard_arrow_down
-                      : Icons.keyboard_arrow_up,
-                  color: Theme.of(context).primaryColorDark,
+    return Material(
+        elevation: 15,
+        shadowColor: Colors.white,
+        borderOnForeground: false,
+        color: Colors.transparent,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned(
+              child: Container(
+                height: _isExpanded()
+                    ? 300
+                    : _containerHeight + _toggleButtonHeight / 2,
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                ),
+                padding: const EdgeInsets.only(top: _toggleButtonHeight / 2),
+                child: AnimatedContainer(
+                  duration: _animationTime,
+                  height: _isExpanded() ? 200 : _containerHeight,
+                  color: Theme.of(context).colorScheme.primary,
+                  curve: Curves.easeInOutSine,
+                  child: _buildFilterInternals(context),
                 ),
               ),
             ),
-          ),
-        ),
-      ],
-    );
+            Positioned(
+              top: 0,
+              child: GestureDetector(
+                onTap: () => widget.onExpand(),
+                child: AnimatedContainer(
+                  duration: _animationTime,
+                  height: _toggleButtonHeight,
+                  width: 100,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    shape: BoxShape.rectangle,
+                    borderRadius: const BorderRadius.all(
+                        Radius.circular(_toggleButtonHeight / 2)),
+                  ),
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.only(bottom: _toggleButtonHeight / 3),
+                    child: Icon(
+                      _isExpanded()
+                          ? Icons.keyboard_arrow_down
+                          : Icons.keyboard_arrow_up,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ));
   }
 }

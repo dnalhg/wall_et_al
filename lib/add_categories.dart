@@ -61,66 +61,76 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: WalletAppBar(
-          title: Constants.CATEGORIES_PAGE_TITlE,
-          actions: [
-            IconButton(
-              icon: Icon(_isEditing ? Icons.check : Icons.edit),
-              onPressed: _handleEditPress,
-            ),
-          ],
-          showMenuButton: widget.chosen == null),
-      drawer: const SideBar(),
-      body: FutureBuilder<List<dynamic>>(
-        future: Future.wait(
-            [_categoriesFuture, widget.chosen ?? Future.value(null)]),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            final List<CategoryEntry> categories = snapshot.data![0];
-            final CategoryEntry? chosen = snapshot.data![1];
+    return WillPopScope(
+      onWillPop: () async {
+        if (!Navigator.of(context).canPop()) {
+          return Future.value(false);
+        }
+        await Future.delayed(Duration.zero);
+        Navigator.of(context).pop(await widget.chosen);
+        return Future.value(false);
+      },
+      child: Scaffold(
+        appBar: WalletAppBar(
+            title: Constants.CATEGORIES_PAGE_TITlE,
+            actions: [
+              IconButton(
+                icon: Icon(_isEditing ? Icons.check : Icons.edit),
+                onPressed: _handleEditPress,
+              ),
+            ],
+            showMenuButton: widget.chosen == null),
+        drawer: const SideBar(),
+        body: FutureBuilder<List<dynamic>>(
+          future: Future.wait(
+              [_categoriesFuture, widget.chosen ?? Future.value(null)]),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              final List<CategoryEntry> categories = snapshot.data![0];
+              final CategoryEntry? chosen = snapshot.data![1];
 
-            return ListView.builder(
-              padding: EdgeInsets.zero,
-              itemCount: categories.length,
-              itemBuilder: (context, index) {
-                CategoryEntry entry = categories[index];
-                return Card(
-                  child: ListTile(
-                    tileColor: entry.color,
-                    leading: Icon(entry.icon),
-                    title: Text(entry.name),
-                    trailing: _buildCategoryDeletionButton(entry),
-                    selected: chosen?.id == entry.id,
-                    onTap: _isEditing || widget.chosen != null
-                        ? () => _handleTileTap(context, entry)
-                        : null,
-                  ),
-                );
-              },
-            );
-          } else if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
-          } else {
-            return const Center(child: CircularProgressIndicator());
-          }
-        },
+              return ListView.builder(
+                padding: EdgeInsets.zero,
+                itemCount: categories.length,
+                itemBuilder: (context, index) {
+                  CategoryEntry entry = categories[index];
+                  return Card(
+                    child: ListTile(
+                      tileColor: entry.color,
+                      leading: Icon(entry.icon),
+                      title: Text(entry.name),
+                      trailing: _buildCategoryDeletionButton(entry),
+                      selected: chosen?.id == entry.id,
+                      onTap: _isEditing || widget.chosen != null
+                          ? () => _handleTileTap(context, entry)
+                          : null,
+                    ),
+                  );
+                },
+              );
+            } else if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            } else {
+              return const Center(child: CircularProgressIndicator());
+            }
+          },
+        ),
+        floatingActionButton: _isEditing
+            ? FloatingActionButton(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                onPressed: () {
+                  _openAddListItemModal((name, color, icon) {
+                    setState(() {
+                      _addCategory(
+                          CategoryEntry(name: name, color: color, icon: icon));
+                    });
+                  }, null);
+                },
+                child: Icon(Icons.add,
+                    color: Theme.of(context).colorScheme.onPrimary),
+              )
+            : null,
       ),
-      floatingActionButton: _isEditing
-          ? FloatingActionButton(
-              backgroundColor: Theme.of(context).primaryColorLight,
-              onPressed: () {
-                _openAddListItemModal((name, color, icon) {
-                  setState(() {
-                    _addCategory(
-                        CategoryEntry(name: name, color: color, icon: icon));
-                  });
-                }, null);
-              },
-              child: Icon(Icons.add,
-                  color: Theme.of(context).colorScheme.onPrimary),
-            )
-          : null,
     );
   }
 

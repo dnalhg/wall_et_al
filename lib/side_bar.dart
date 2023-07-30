@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wall_et_al/constants.dart';
+import 'package:wall_et_al/routes.dart';
 
 class SideBar extends StatelessWidget {
   const SideBar({super.key});
@@ -14,7 +15,7 @@ class SideBar extends StatelessWidget {
             height: 150,
             child: DrawerHeader(
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColorLight,
+                color: Theme.of(context).colorScheme.primary,
               ),
               padding: Constants.DEFAULT_EDGE_INSETS,
               child: Column(
@@ -27,22 +28,23 @@ class SideBar extends StatelessWidget {
               ),
             )),
         ListTile(
-          leading: const Icon(Icons.home),
-          title: const Text('Home'),
-          onTap: () {
-            Navigator.pop(context);
-            Navigator.pushReplacementNamed(context, "/");
-          },
-        ),
+            leading: const Icon(Icons.home),
+            title: const Text('Home'),
+            onTap: () {
+              Navigator.pop(context);
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                replaceWithNewPage(context, "/");
+              });
+            }),
         ListTile(
-          leading: const Icon(Icons.category),
-          title: const Text('Categories'),
-          onTap: () {
-            Navigator.pop(context);
-            Navigator.pushReplacementNamed(
-                context, Constants.CATEGORIES_PAGE_ROUTE);
-          },
-        ),
+            leading: const Icon(Icons.category),
+            title: const Text('Categories'),
+            onTap: () {
+              Navigator.pop(context);
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                replaceWithNewPage(context, Constants.CATEGORIES_PAGE_ROUTE);
+              });
+            })
       ],
     ));
   }

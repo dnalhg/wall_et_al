@@ -43,7 +43,7 @@ class _WalletAppBarState extends State<WalletAppBar> {
                   padding: const EdgeInsets.only(right: 15.0, bottom: 5.0),
                   child: () {
                     var total = Provider.of<ExpenseTotal>(context);
-                    return Text(total.expenseTotal.toStringAsFixed(2),
+                    return Text('\$ ${total.expenseTotal.toStringAsFixed(2)}',
                         style: const TextStyle(fontSize: 20));
                   }(),
                 ),

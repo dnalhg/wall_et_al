@@ -173,18 +173,18 @@ class _AddExpenseState extends State<AddExpenseRoute> {
             }
             return Text(text,
                 style: TextStyle(
-                    color: Theme.of(context).primaryColorDark, fontSize: 17));
+                    color: Theme.of(context).colorScheme.onPrimaryContainer, fontSize: 17));
           } else {
             return Text('',
                 style: TextStyle(
-                    color: Theme.of(context).primaryColorDark, fontSize: 17));
+                    color: Theme.of(context).colorScheme.onPrimaryContainer, fontSize: 17));
           }
         });
   }
 
   Widget _currentAmountDisplay(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(color: Theme.of(context).primaryColorLight),
+      decoration: BoxDecoration(color: Theme.of(context).colorScheme.primaryContainer),
       padding: const EdgeInsets.all(16),
       child: Stack(
         children: [
@@ -196,7 +196,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
               child: Text(
                 _displayedAmount,
                 style: TextStyle(
-                    color: Theme.of(context).primaryColorDark,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
                     fontSize: 58,
                     fontWeight: FontWeight.bold),
               ),
@@ -216,7 +216,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
                     Text(
                       'Category',
                       style: TextStyle(
-                          color: Theme.of(context).primaryColorDark,
+                          color: Theme.of(context).colorScheme.onPrimaryContainer,
                           fontSize: 14),
                     ),
                     _getCategoryName(context),
@@ -234,11 +234,11 @@ class _AddExpenseState extends State<AddExpenseRoute> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.calendar_today,
-                      color: Theme.of(context).primaryColorDark),
+                      color: Theme.of(context).colorScheme.onPrimaryContainer),
                   const SizedBox(width: 8),
                   Text(
                     '${_twoDigits(_displayedDate.day)}-${_twoDigits(_displayedDate.month)}-${_displayedDate.year}',
-                    style: TextStyle(color: Theme.of(context).primaryColorDark),
+                    style: TextStyle(color: Theme.of(context).colorScheme.onPrimaryContainer),
                   ),
                 ],
               ),
@@ -253,11 +253,11 @@ class _AddExpenseState extends State<AddExpenseRoute> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.timelapse,
-                      color: Theme.of(context).primaryColorDark),
+                      color: Theme.of(context).colorScheme.onPrimaryContainer),
                   const SizedBox(width: 8),
                   Text(
                     '${_twoDigits(_displayedTime.hour)}:${_twoDigits(_displayedTime.minute)}',
-                    style: TextStyle(color: Theme.of(context).primaryColorDark),
+                    style: TextStyle(color: Theme.of(context).colorScheme.onPrimaryContainer),
                   ),
                 ],
               ),
@@ -273,14 +273,14 @@ class _AddExpenseState extends State<AddExpenseRoute> {
               decoration: InputDecoration(
                 labelText: 'Description',
                 floatingLabelStyle: TextStyle(
-                    color: Theme.of(context).primaryColorDark, fontSize: 19),
+                    color: Theme.of(context).colorScheme.onPrimaryContainer, fontSize: 19),
                 labelStyle: TextStyle(
-                    color: Theme.of(context).primaryColorDark, fontSize: 17),
+                    color: Theme.of(context).colorScheme.onPrimaryContainer, fontSize: 17),
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
               ),
               style: TextStyle(
-                  color: Theme.of(context).primaryColorDark, fontSize: 17),
+                  color: Theme.of(context).colorScheme.onPrimaryContainer, fontSize: 17),
               controller: _descriptionController,
             ),
           ),

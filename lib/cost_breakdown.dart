@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:wall_et_al/routes.dart';
 
 import 'add_expense.dart';
 import 'database.dart';
@@ -16,18 +17,6 @@ class _CostBreakdownState extends State<CostBreakdown> {
   Future<List<ExpenseEntry>>? _expenses;
   late List<CategoryEntry> _categories;
 
-  void _expandExpense(BuildContext context, ExpenseEntry e) {
-    Navigator.push<Future<void>?>(
-      context,
-      MaterialPageRoute(builder: (context) => AddExpenseRoute(entry: e)),
-    ).then((Future<void>? saveComplete) async {
-      if (saveComplete != null) await saveComplete!;
-      setState(() {
-        _getExpenses();
-      });
-    });
-  }
-
   ListTile _createExpenseView(BuildContext context, ExpenseEntry e) {
     final DateTime expenseTime =
         DateTime.fromMillisecondsSinceEpoch(e.msSinceEpoch);
@@ -38,12 +27,12 @@ class _CostBreakdownState extends State<CostBreakdown> {
     return ListTile(
       leading: CircleAvatar(
         backgroundColor: category.color,
-        child: Icon(category.icon, color: Theme.of(context).primaryColorDark),
+        child: Icon(category.icon, color: Theme.of(context).colorScheme.onBackground),
       ),
       title:
           Text(category.name, style: Theme.of(context).textTheme.titleMedium),
       subtitle: Text(e.description),
-      onTap: () => _expandExpense(context, e),
+      onTap: () => pushWithSlideUp(context, AddExpenseRoute(entry: e)),
       trailing: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -91,6 +80,7 @@ class _CostBreakdownState extends State<CostBreakdown> {
   Widget build(BuildContext context) {
     var excludeCategories = Provider.of<ExcludeCategories>(context);
     var timeFilter = Provider.of<TimeFilter>(context);
+    Provider.of<ExpenseDatabase>(context);
 
     return FutureBuilder(
         future: Future.wait([

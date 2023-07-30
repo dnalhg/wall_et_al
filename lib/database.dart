@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
-class ExpenseDatabase {
+class ExpenseDatabase with ChangeNotifier {
   static final Future<Database> _database = _initDatabase();
   static const String _expenseTableName = 'expenses';
   static const String _categoriesTableName = 'categories';
@@ -47,25 +47,36 @@ class ExpenseDatabase {
   Future<int> insertExpense(ExpenseEntry e) async {
     final db = await _database;
 
-    return await db.insert(
+    return await db
+        .insert(
       _expenseTableName,
       e.toMap(),
       conflictAlgorithm: ConflictAlgorithm.rollback,
-    );
+    )
+        .then((value) {
+      notifyListeners();
+      return value;
+    });
   }
 
   Future<int> updateExpense(ExpenseEntry e) async {
     final db = await _database;
 
     return await db.update(_expenseTableName, e.toMap(),
-        where: 'id = ?', whereArgs: [e.id]);
+        where: 'id = ?', whereArgs: [e.id]).then((value) {
+      notifyListeners();
+      return value;
+    });
   }
 
   Future<int> removeExpense(ExpenseEntry e) async {
     final db = await _database;
 
     return await db
-        .delete(_expenseTableName, where: 'id = ?', whereArgs: [e.id]);
+        .delete(_expenseTableName, where: 'id = ?', whereArgs: [e.id]).then((value) {
+          notifyListeners();
+          return value;
+    });
   }
 
   /// [timeFilter] is a string of the format 'startTime-endTime' where startTime
