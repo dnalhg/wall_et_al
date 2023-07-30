@@ -72,10 +72,10 @@ class ExpenseDatabase with ChangeNotifier {
   Future<int> removeExpense(ExpenseEntry e) async {
     final db = await _database;
 
-    return await db
-        .delete(_expenseTableName, where: 'id = ?', whereArgs: [e.id]).then((value) {
-          notifyListeners();
-          return value;
+    return await db.delete(_expenseTableName,
+        where: 'id = ?', whereArgs: [e.id]).then((value) {
+      notifyListeners();
+      return value;
     });
   }
 

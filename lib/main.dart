@@ -39,14 +39,13 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: Constants.APP_NAME,
       theme: ThemeData(
-        brightness: Brightness.dark,
-        useMaterial3: true,
-        appBarTheme: AppBarTheme(color: mainColorScheme.primary),
-        colorScheme: mainColorScheme,
-        iconTheme: const IconThemeData(color: Colors.white),
-        scaffoldBackgroundColor: const Color(0xff1e2529),
-        shadowColor: Colors.white
-      ),
+          brightness: Brightness.dark,
+          useMaterial3: true,
+          appBarTheme: AppBarTheme(color: mainColorScheme.primary),
+          colorScheme: mainColorScheme,
+          iconTheme: const IconThemeData(color: Colors.white),
+          scaffoldBackgroundColor: const Color(0xff1e2529),
+          shadowColor: Colors.white),
       routes: routes,
     );
   }

@@ -27,7 +27,8 @@ class _CostBreakdownState extends State<CostBreakdown> {
     return ListTile(
       leading: CircleAvatar(
         backgroundColor: category.color,
-        child: Icon(category.icon, color: Theme.of(context).colorScheme.onBackground),
+        child: Icon(category.icon,
+            color: Theme.of(context).colorScheme.onBackground),
       ),
       title:
           Text(category.name, style: Theme.of(context).textTheme.titleMedium),
