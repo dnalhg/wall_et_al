@@ -13,6 +13,8 @@ import 'filter_bar.dart';
 
 // TODO's
 // swipe to delete
+// add tags
+// import export
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
