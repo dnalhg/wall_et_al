@@ -31,7 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
   sqflite: ^2.2.4+1
-  path: ^1.8.2
+  path: ^1.8.3
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -117,7 +117,7 @@ flutter_native_splash:
   #image: assets/android12splash.png
 
   # Splash screen background color.
-  #color: "#42a5f5"
+    color: "#477388"
 
   # App icon background color.
   #icon_background_color: "#111111"
