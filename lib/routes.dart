@@ -39,7 +39,8 @@ void replaceWithNewPage(BuildContext context, String newRouteName) {
   }
 }
 
-void pushWithSlideUp(BuildContext context, Widget widgetToPush) {
+void pushWithSlideUp(BuildContext context, Widget widgetToPush,
+    {Function? onFinish}) {
   Navigator.push(
     context,
     PageRouteBuilder(
@@ -58,5 +59,9 @@ void pushWithSlideUp(BuildContext context, Widget widgetToPush) {
         );
       },
     ),
-  );
+  ).then((value) {
+    if (onFinish != null) {
+      onFinish(value);
+    }
+  });
 }

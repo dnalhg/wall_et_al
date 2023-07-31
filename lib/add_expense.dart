@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wall_et_al/add_categories.dart';
+import 'package:wall_et_al/routes.dart';
 
 import 'calculator.dart';
 import 'database.dart';
@@ -21,6 +22,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
   late TimeOfDay _displayedTime;
   Function? _getFinalAmount;
   String _displayedAmount = "0";
+  List<String> selectedTags = [];
 
   Future<CategoryEntry> _initCategory() async {
     return (await ExpenseDatabase.instance.getCategories()).firstWhere(
@@ -113,13 +115,10 @@ class _AddExpenseState extends State<AddExpenseRoute> {
 
   void _handleCategoryPicker(BuildContext context) {
     _resetFocus();
-    Navigator.push<CategoryEntry>(
-      context,
-      MaterialPageRoute(
-          builder: (context) => AddCategoryPage(chosen: _category)),
-    ).then((CategoryEntry? entry) {
+    pushWithSlideUp(context, AddCategoryPage(chosen: _category),
+        onFinish: (value) {
       setState(() {
-        _category = Future.value(entry ?? ExpenseDatabase.nullCategory);
+        _category = Future.value(value ?? ExpenseDatabase.nullCategory);
       });
     });
   }
@@ -158,30 +157,95 @@ class _AddExpenseState extends State<AddExpenseRoute> {
   }
 
   Widget _getCategoryName(BuildContext context) {
-    return FutureBuilder(
-        future: _category,
-        builder: (BuildContext context, AsyncSnapshot<CategoryEntry> snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            String text;
-            if (snapshot.hasError) {
-              text = 'Error: ${snapshot.error}';
-            } else if (!snapshot.hasData) {
-              text = 'Error: no data';
-            } else {
-              CategoryEntry entry = snapshot.data!;
-              text = entry.name;
-            }
-            return Text(text,
+    return IntrinsicWidth(
+        child: ActionChip(
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            onPressed: () => _handleCategoryPicker(context),
+            label: FutureBuilder(
+                future: _category,
+                builder: (BuildContext context,
+                    AsyncSnapshot<CategoryEntry> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    String text;
+                    IconData icon = Icons.cancel_outlined;
+
+                    if (snapshot.hasError) {
+                      text = 'Error: ${snapshot.error}';
+                    } else if (!snapshot.hasData) {
+                      text = 'Error: no data';
+                    } else {
+                      CategoryEntry entry = snapshot.data!;
+                      icon = entry.icon;
+                      text = entry.name;
+                    }
+                    return Row(children: [
+                      Icon(icon,
+                          size: 14,
+                          color:
+                              Theme.of(context).colorScheme.onPrimaryContainer),
+                      Padding(padding: EdgeInsets.only(left: 5)),
+                      Text(text,
+                          style: TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer,
+                              fontSize: 14))
+                    ]);
+                  } else {
+                    return Text('',
+                        style: TextStyle(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimaryContainer,
+                            fontSize: 14));
+                  }
+                })));
+  }
+
+  Widget tagsWidget(BuildContext context) {
+    return ListView.separated(
+      scrollDirection: Axis.horizontal,
+      itemCount: selectedTags.length + 1, // plus one for 'Add Tag' chip
+      itemBuilder: (context, index) {
+        if (index == selectedTags.length) {
+          // add the 'Add Tag' chip at the end of the list
+          return GestureDetector(
+            onTap: () async {
+              // String newTag = await yourAddTagDialogFunction();
+              setState(() {
+                selectedTags.add("value");
+              });
+            },
+            child: Chip(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              label: Text('Add tag',
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      fontSize: 14)),
+            ),
+          );
+        } else {
+          return Chip(
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            label: Text(selectedTags[index],
                 style: TextStyle(
                     color: Theme.of(context).colorScheme.onPrimaryContainer,
-                    fontSize: 17));
-          } else {
-            return Text('',
-                style: TextStyle(
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                    fontSize: 17));
-          }
-        });
+                    fontSize: 14)),
+            onDeleted: () {
+              setState(() {
+                selectedTags.removeAt(index);
+              });
+            },
+            deleteIcon: Icon(Icons.delete,
+                size: 14,
+                color: Theme.of(context).colorScheme.onPrimaryContainer),
+          );
+        }
+      },
+      separatorBuilder: (BuildContext context, int index) {
+        return Padding(padding: EdgeInsets.only(right: 3));
+      },
+    );
   }
 
   Widget _currentAmountDisplay(BuildContext context) {
@@ -206,32 +270,51 @@ class _AddExpenseState extends State<AddExpenseRoute> {
             ),
           ),
           Positioned(
-            left: 0,
-            bottom: 80,
-            child: InkWell(
-              onTap: () => _handleCategoryPicker(context),
-              child: SizedBox(
-                // height: 38,
-                width: 150,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Category',
-                      style: TextStyle(
-                          color:
-                              Theme.of(context).colorScheme.onPrimaryContainer,
-                          fontSize: 14),
+              left: 0,
+              bottom: 65,
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 175,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Category',
+                          style: TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer,
+                              fontSize: 14),
+                        ),
+                        Padding(padding: EdgeInsets.all(3)),
+                        SizedBox(height: 35, child: _getCategoryName(context)),
+                      ],
                     ),
-                    _getCategoryName(context),
-                  ],
-                ),
-              ),
-            ),
-          ),
+                  ),
+                  SizedBox(
+                      width: 175,
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              'Tags',
+                              style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimaryContainer,
+                                  fontSize: 14),
+                            ),
+                            Padding(padding: EdgeInsets.all(3)),
+                            SizedBox(height: 35, child: tagsWidget(context))
+                          ]))
+                ],
+              )),
           Positioned(
-            right: 90,
-            bottom: 80,
+            left: 0,
+            bottom: 150,
             child: InkWell(
               onTap: _handleDatePicker,
               child: Row(
@@ -251,8 +334,8 @@ class _AddExpenseState extends State<AddExpenseRoute> {
             ),
           ),
           Positioned(
-            right: 0,
-            bottom: 80,
+            left: 120,
+            bottom: 150,
             child: InkWell(
               onTap: _handleTimePicker,
               child: Row(
@@ -277,7 +360,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
             right: 0,
             child: TextFormField(
               maxLines: 1,
-              showCursor: false,
+              showCursor: true,
               decoration: InputDecoration(
                 labelText: 'Description',
                 floatingLabelStyle: TextStyle(
@@ -286,7 +369,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
                 labelStyle: TextStyle(
                     color: Theme.of(context).colorScheme.onPrimaryContainer,
                     fontSize: 17),
-                enabledBorder: InputBorder.none,
+                // enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
               ),
               style: TextStyle(

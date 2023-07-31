@@ -12,7 +12,6 @@ import 'database.dart';
 import 'filter_bar.dart';
 
 // TODO's
-// swipe to delete
 // add tags
 // import export
 
@@ -40,6 +39,13 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: Constants.APP_NAME,
       theme: ThemeData(
+          chipTheme: ChipThemeData(
+            shadowColor: Colors.transparent,
+            selectedShadowColor: Colors.transparent,
+            surfaceTintColor: Colors.transparent,
+            shape: StadiumBorder(),
+            side: BorderSide.none,
+          ),
           brightness: Brightness.dark,
           useMaterial3: true,
           appBarTheme: AppBarTheme(color: mainColorScheme.primary),

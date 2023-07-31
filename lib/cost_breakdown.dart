@@ -18,33 +18,53 @@ class _CostBreakdownState extends State<CostBreakdown> {
   Future<List<ExpenseEntry>>? _expenses;
   late List<CategoryEntry> _categories;
 
-  ListTile _createExpenseView(BuildContext context, ExpenseEntry e) {
+  Widget _createExpenseView(BuildContext context, ExpenseEntry e) {
     final DateTime expenseTime =
         DateTime.fromMillisecondsSinceEpoch(e.msSinceEpoch);
     CategoryEntry category = _categories.firstWhere(
       (CategoryEntry cat) => cat.id == e.categoryId,
       orElse: () => ExpenseDatabase.nullCategory,
     );
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: category.color,
-        child: Icon(category.icon,
-            color: Theme.of(context).colorScheme.onBackground),
+    return Dismissible(
+      key: Key(e.id.toString()), // UNIQUE KEY IS REQUIRED
+      background: Container(
+        alignment: Alignment.centerRight,
+        color: Colors.red,
+        child: const Padding(
+          padding: EdgeInsets.only(right: 20.0),
+          child: Icon(
+            Icons.delete,
+            color: Colors.white,
+          ),
+        ),
       ),
-      title:
-          Text(category.name, style: Theme.of(context).textTheme.titleMedium),
-      subtitle: Text(e.description),
-      onTap: () => pushWithSlideUp(context, AddExpenseRoute(entry: e)),
-      trailing: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Text(e.amount.toStringAsFixed(2),
-              style: const TextStyle(color: Colors.redAccent, fontSize: 18)),
-          Text(
-              "${expenseTime.day.toString().padLeft(2, '0')}-${expenseTime.month.toString().padLeft(2, '0')}-${expenseTime.year}",
-              style: const TextStyle(fontSize: 14)),
-        ],
+      direction: DismissDirection.endToStart,
+      onDismissed: (direction) {
+      },
+      confirmDismiss: (direction) async {
+        var res = await ExpenseDatabase.instance.removeExpense(e);
+        return res != 0;
+      },
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: category.color,
+          child: Icon(category.icon,
+              color: Theme.of(context).colorScheme.onBackground),
+        ),
+        title: Text(category.name, style: Theme.of(context).textTheme.titleMedium),
+        subtitle: Text(e.description),
+        onTap: () => pushWithSlideUp(context, AddExpenseRoute(entry: e)),
+        trailing: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(e.amount.toStringAsFixed(2),
+                style: const TextStyle(color: Colors.redAccent, fontSize: 18)),
+            Text(
+                "${expenseTime.day.toString().padLeft(2, '0')}-${expenseTime.month.toString().padLeft(2, '0')}-${expenseTime.year}",
+                style: const TextStyle(fontSize: 14)),
+          ],
+        ),
       ),
     );
   }
@@ -104,7 +124,7 @@ class _CostBreakdownState extends State<CostBreakdown> {
                   return Card(
                     margin: EdgeInsets.all(15),
                     color: Theme.of(context).colorScheme.secondaryContainer,
-                    child: ExpensePieChart(expenses: entries, categories: _categories),
+                    child: Container(height: 450, child: ExpensePieChart(expenses: entries, categories: _categories)),
                   );
                 } else {
                   return _createExpenseView(context, entries[idx - 1]);
