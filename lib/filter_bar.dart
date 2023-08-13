@@ -232,10 +232,10 @@ class _FilterBarState extends State<FilterBar> {
                                     child: FilterChip(
                                         selectedColor: Theme.of(context)
                                             .colorScheme
-                                            .secondary,
+                                            .onPrimary,
                                         backgroundColor: Theme.of(context)
                                             .colorScheme
-                                            .onPrimary,
+                                            .secondaryContainer,
                                         label: Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
@@ -338,7 +338,7 @@ class _FilterBarState extends State<FilterBar> {
   Widget build(BuildContext context) {
     return Material(
         elevation: 15,
-        shadowColor: Colors.white,
+        // shadowColor: Colors.white,
         borderOnForeground: false,
         color: Colors.transparent,
         child: GestureDetector(

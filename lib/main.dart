@@ -12,8 +12,8 @@ import 'database.dart';
 import 'filter_bar.dart';
 
 // TODO's
-// add tags
 // import export
+// notifications
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,9 +31,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var mainColorScheme = ColorScheme.fromSeed(
-      seedColor: const Color(0xff477388),
+      seedColor: const Color(0xff373935),
       brightness: Brightness.dark,
-      primary: const Color(0xff477388),
+      primary: const Color(0xff373935),
+      onPrimary:const Color(0xff9b9b9b),
+      primaryContainer: const Color(0xff6c6f68) ,
+      onPrimaryContainer: const Color(0xffcdcfcb),
+      secondaryContainer: const Color(0xff51534E),
+      surfaceTint:const Color(0xffcdcfcb),
     );
 
     return MaterialApp(
@@ -51,8 +56,8 @@ class MyApp extends StatelessWidget {
           appBarTheme: AppBarTheme(color: mainColorScheme.primary),
           colorScheme: mainColorScheme,
           iconTheme: const IconThemeData(color: Colors.white),
-          scaffoldBackgroundColor: const Color(0xff1e2529),
-          shadowColor: Colors.white),
+          scaffoldBackgroundColor: const Color(0xff2a2727),
+          ),
       routes: routes,
     );
   }

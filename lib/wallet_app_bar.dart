@@ -26,7 +26,9 @@ class _WalletAppBarState extends State<WalletAppBar> {
       title: Transform.translate(
           offset: widget.showMenuButton ? Offset(-25, 0) : Offset(0, 0),
           child: Row(children: [
-            widget.showMenuButton ? Image.asset(width: 50, 'assets/logo.png') : Text(''),
+            widget.showMenuButton
+                ? Image.asset(width: 50, 'assets/logo.png')
+                : Text(''),
             Text(widget.title)
           ])),
       // add a side menu button to the app bar
@@ -38,7 +40,10 @@ class _WalletAppBarState extends State<WalletAppBar> {
                 Scaffold.of(context).openDrawer();
               },
             )
-          : null,
+          : IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
       actions: widget.actions ??
           ([
             Column(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wall_et_al/add_categories.dart';
 import 'package:wall_et_al/routes.dart';
 
+import 'add_tags.dart';
 import 'calculator.dart';
 import 'database.dart';
 
@@ -20,14 +21,22 @@ class _AddExpenseState extends State<AddExpenseRoute> {
   late Future<CategoryEntry> _category;
   late DateTime _displayedDate;
   late TimeOfDay _displayedTime;
+  late Future<List<TagEntry>> _selectedTags;
   Function? _getFinalAmount;
   String _displayedAmount = "0";
-  List<String> selectedTags = [];
 
   Future<CategoryEntry> _initCategory() async {
     return (await ExpenseDatabase.instance.getCategories()).firstWhere(
         (CategoryEntry e) => e.id == widget.entry?.categoryId,
         orElse: () => ExpenseDatabase.nullCategory);
+  }
+
+  Future<List<TagEntry>> _initTags() async {
+    if (widget.entry != null && widget.entry!.id != null ) {
+      return ExpenseDatabase.instance.getTagsForExpense(widget.entry!.id!);
+    } else {
+      return Future.value([]);
+    }
   }
 
   @override
@@ -38,6 +47,7 @@ class _AddExpenseState extends State<AddExpenseRoute> {
       entry: widget.entry,
     );
     _category = _initCategory();
+    _selectedTags = _initTags();
     _descriptionController =
         TextEditingController(text: widget.entry?.description);
     _displayedDate = DateTime.fromMillisecondsSinceEpoch(
@@ -93,22 +103,46 @@ class _AddExpenseState extends State<AddExpenseRoute> {
         // Try insert 5 times with retries
         ExpenseEntry e = await _createExpense(finalAmount);
         int status = await ExpenseDatabase.instance.insertExpense(e);
+
         if (status == 0) {
           _raiseError("Could not add expense to database");
+          return;
         }
-        // Failed to add so raise an error
+
+        var tagFutures = (await _selectedTags)
+            .map((e) => ExpenseDatabase().insertTag(status, e))
+            .toList();
+        var statuses = await Future.wait(tagFutures);
+        if (statuses.any((element) => element == 0)) {
+          _raiseError("Wasn't able to add all the tags");
+        }
       });
     } else {
       return Future.delayed(Duration.zero, () async {
         ExpenseEntry oldEntry = widget.entry!;
         ExpenseEntry newEntry =
             await _createExpense(finalAmount, id: oldEntry.id);
+        int status = 0;
         if (oldEntry != newEntry) {
-          int status = await ExpenseDatabase.instance.updateExpense(newEntry);
+          status = await ExpenseDatabase.instance.updateExpense(newEntry);
           if (status == 0) {
             _raiseError("Could not add expense to database");
           }
         }
+
+        var selectedTagsResolved = await _selectedTags;
+
+        var oldTags =
+            await ExpenseDatabase.instance.getTagsForExpense(newEntry.id!);
+        var tagsToRemove = oldTags.toSet().difference(selectedTagsResolved.toSet());
+
+        var deletionFutures = tagsToRemove
+            .where((element) => element.id != null) .map((e) => ExpenseDatabase.instance
+                .deleteTagFromExpense(newEntry.id!, e.id!))
+            .toList();
+        var insertionFutures = selectedTagsResolved.map((e) => ExpenseDatabase.instance.insertTag(newEntry.id!, e)).toList();
+        Future.wait(deletionFutures + insertionFutures);
+        return;
       });
     }
   }
@@ -117,8 +151,29 @@ class _AddExpenseState extends State<AddExpenseRoute> {
     _resetFocus();
     pushWithSlideUp(context, AddCategoryPage(chosen: _category),
         onFinish: (value) {
+      if (value != null) {
+        setState(() {
+          _category = Future.value(value ?? ExpenseDatabase.nullCategory);
+        });
+      }
+    });
+  }
+
+  void _handleTagPicker(BuildContext context) async {
+    _resetFocus();
+
+    var tags = await _selectedTags;
+
+    pushWithSlideUp(context,
+        TagsPage(expenseId: widget.entry?.id, selectedTags: tags),
+        onFinish: (Map<TagEntry, bool> tagsFromWidget) {
+      var tags = tagsFromWidget.entries
+          .where((element) => element.value)
+          .map((e) => e.key)
+          .toList();
+      tags.sort((a, b) => a.tagName.compareTo(b.tagName));
       setState(() {
-        _category = Future.value(value ?? ExpenseDatabase.nullCategory);
+        _selectedTags = Future.value(tags);
       });
     });
   }
@@ -203,48 +258,55 @@ class _AddExpenseState extends State<AddExpenseRoute> {
   }
 
   Widget tagsWidget(BuildContext context) {
-    return ListView.separated(
-      scrollDirection: Axis.horizontal,
-      itemCount: selectedTags.length + 1, // plus one for 'Add Tag' chip
-      itemBuilder: (context, index) {
-        if (index == selectedTags.length) {
-          // add the 'Add Tag' chip at the end of the list
-          return GestureDetector(
-            onTap: () async {
-              // String newTag = await yourAddTagDialogFunction();
-              setState(() {
-                selectedTags.add("value");
-              });
-            },
-            child: Chip(
+    return FutureBuilder(future: _selectedTags, builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return CircularProgressIndicator();
+      }
+
+      var resolvedTags = snapshot.data!;
+
+      return ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: resolvedTags.length + 1, // plus one for 'Add Tag' chip
+        itemBuilder: (context, index) {
+          if (index == resolvedTags.length) {
+            // add the 'Add Tag' chip at the end of the list
+            return GestureDetector(
+              onTap: () async {
+                _handleTagPicker(context);
+              },
+              child: Chip(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                label: Text('Add tag',
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        fontSize: 14)),
+              ),
+            );
+          } else {
+            return Chip(
               backgroundColor: Theme.of(context).colorScheme.primary,
-              label: Text('Add tag',
+              label: Text(resolvedTags[index].tagName,
                   style: TextStyle(
                       color: Theme.of(context).colorScheme.onPrimaryContainer,
                       fontSize: 14)),
-            ),
-          );
-        } else {
-          return Chip(
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            label: Text(selectedTags[index],
-                style: TextStyle(
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                    fontSize: 14)),
-            onDeleted: () {
-              setState(() {
-                selectedTags.removeAt(index);
-              });
-            },
-            deleteIcon: Icon(Icons.delete,
-                size: 14,
-                color: Theme.of(context).colorScheme.onPrimaryContainer),
-          );
-        }
-      },
-      separatorBuilder: (BuildContext context, int index) {
-        return Padding(padding: EdgeInsets.only(right: 3));
-      },
+              onDeleted: () {
+                setState(() {
+                  resolvedTags.removeAt(index);
+                  _selectedTags = Future.value(resolvedTags);
+                });
+              },
+              deleteIcon: Icon(Icons.delete,
+                  size: 14,
+                  color: Theme.of(context).colorScheme.onPrimaryContainer),
+            );
+          }
+        },
+        separatorBuilder: (BuildContext context, int index) {
+          return Padding(padding: EdgeInsets.only(right: 3));
+        },
+      );
+    }
     );
   }
 

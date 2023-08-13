@@ -123,7 +123,7 @@ class _CostBreakdownState extends State<CostBreakdown> {
                 if (idx == 0) {
                   return Card(
                     margin: EdgeInsets.all(15),
-                    color: Theme.of(context).colorScheme.secondaryContainer,
+                    color: Theme.of(context).colorScheme.primaryContainer,
                     child: Container(height: 450, child: ExpensePieChart(expenses: entries, categories: _categories)),
                   );
                 } else {

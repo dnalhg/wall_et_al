@@ -8,15 +8,20 @@ class ExpenseDatabase with ChangeNotifier {
   static final Future<Database> _database = _initDatabase();
   static const String _expenseTableName = 'expenses';
   static const String _categoriesTableName = 'categories';
+  static const String _tagsTableName = 'tags';
+  static const String _expensesToTagsTable = 'expenseTags';
 
   static final CategoryEntry nullCategory = CategoryEntry(
-      name: "Other", icon: Icons.do_disturb_alt_sharp, color: Colors.red, id: 1);
+      name: "Other",
+      icon: Icons.do_disturb_alt_sharp,
+      color: Colors.red,
+      id: 1);
 
   static ExpenseDatabase instance = ExpenseDatabase();
 
   static Future<Database> _initDatabase() async {
     String dbPath = join(await getDatabasesPath(), 'expense_database.db');
-    // databaseFactory.deleteDatabase(dbPath);
+    databaseFactory.deleteDatabase(dbPath);
     return openDatabase(
       dbPath,
       onCreate: (db, version) async {
@@ -39,6 +44,21 @@ class ExpenseDatabase with ChangeNotifier {
             )
             ''');
         await db.insert(_categoriesTableName, nullCategory.toMap());
+        await db.execute('''
+           CREATE TABLE $_tagsTableName (
+             id INTEGER PRIMARY KEY AUTOINCREMENT,
+             name TEXT NOT NULL UNIQUE
+           )
+        ''');
+        await db.execute('''
+           CREATE TABLE $_expensesToTagsTable (
+             expense_id INTEGER,
+             tag_id INTEGER,
+             PRIMARY KEY (expense_id, tag_id),
+             FOREIGN KEY (expense_id) REFERENCES $_expenseTableName(id),
+             FOREIGN KEY (tag_id) REFERENCES $_tagsTableName(id)
+           )
+        ''');
       },
       version: 1,
     );
@@ -134,6 +154,149 @@ class ExpenseDatabase with ChangeNotifier {
     return (await db.query(_categoriesTableName))
         .map((m) => CategoryEntry.fromMap(m))
         .toList();
+  }
+
+  Future<int> insertTag(int expenseId, TagEntry entry) async {
+    final db = await _database;
+    if (entry.id == null) {
+      try {
+        var id = await db.insert(
+          _tagsTableName,
+          entry.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.fail,
+        );
+        entry.id = id;
+      } catch (e) {
+        if (e is DatabaseException && e.isUniqueConstraintError()) {
+          print("Tag name already exists. Retrieving existing id.");
+
+          List<Map<String, dynamic>> maps = await db.query(
+            _tagsTableName,
+            where: "name = ?",
+            whereArgs: [entry.tagName],
+          );
+
+          if (maps.isNotEmpty) {
+            entry.id = maps.first['id'];
+          }
+        }
+      }
+    }
+
+    await db.insert(
+        _expensesToTagsTable, {'expense_id': expenseId, 'tag_id': entry.id!},
+        conflictAlgorithm: ConflictAlgorithm.rollback);
+
+    return entry.id!;
+  }
+
+  Future<int> deleteTag(int tagId) async {
+    final db = await _database;
+    await db.delete(
+      _expensesToTagsTable,
+      where: 'tag_id = ?',
+      whereArgs: [tagId],
+    );
+    return await db.delete(_tagsTableName, where: 'id = ?', whereArgs: [tagId]);
+  }
+
+  Future<int> deleteTagFromExpense(int expenseId, int tagId) async {
+    final db = await _database;
+    // Delete the relationship from the linking table, so that the tag is no longer related to the expense
+    int count = await db.delete(
+      _expensesToTagsTable,
+      where: 'expense_id = ? AND tag_id = ?',
+      whereArgs: [expenseId, tagId],
+    );
+
+    // Check if the tag is still related to any expense
+    List<Map<String, dynamic>> rows = await db.query(
+      _expensesToTagsTable,
+      where: 'tag_id = ?',
+      whereArgs: [tagId],
+    );
+
+    // If the tag isn't related to any expense anymore, delete it from the tags table
+    if (rows.isEmpty) {
+      await db.delete(
+        _tagsTableName,
+        where: 'id = ?',
+        whereArgs: [tagId],
+      );
+    }
+
+    return count;
+  }
+
+  Future<List<TagEntry>> getTagsForExpense(int expenseId) async {
+    final db = await _database; //get your database instance
+
+    var result = await db.rawQuery(
+      '''
+    SELECT T.name, T.id
+      FROM $_tagsTableName T 
+      INNER JOIN $_expensesToTagsTable ET 
+        ON T.id = ET.tag_id 
+      WHERE ET.expense_id = $expenseId
+    ''',
+    );
+
+    var results = result.map((item) => TagEntry.fromMap(item)).toList();
+    return results;
+  }
+
+  Future<List<TagEntry>> getTags() async {
+    final db = await _database; //get your database instance
+
+    return (await db.query(_tagsTableName))
+        .map((m) => TagEntry.fromMap(m))
+        .toList();
+  }
+
+  Future<int> updateTag(TagEntry e) async {
+    final db = await _database;
+
+    return await db.update(_tagsTableName, e.toMap(),
+        where: 'id = ?', whereArgs: [e.id]);
+  }
+
+}
+
+class TagEntry {
+  int? id;
+  final String tagName;
+
+  TagEntry({required String tagName, this.id})
+      : tagName = tagName.trim().toLowerCase();
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TagEntry &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          tagName == other.tagName;
+
+  @override
+  int get hashCode => id.hashCode ^ tagName.hashCode;
+
+  Map<String, dynamic> toMap() {
+    Map<String, dynamic> res = {
+      'name': tagName,
+    };
+    if (id != null) {
+      res['id'] = id;
+    }
+    return res;
+  }
+
+  factory TagEntry.fromMap(Map<String, dynamic> m) {
+    return TagEntry(tagName: m['name'], id: m['id']);
+  }
+
+  @override
+  String toString() {
+    return 'TagEntry{id: $id, tagName: $tagName}';
   }
 }
 

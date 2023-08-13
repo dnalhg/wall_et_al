@@ -40,14 +40,14 @@ class _ListItemModalState extends State<ListItemModal> {
 
   final List<Color> colorPalette = [
     const Color(0xffDF7861),
-    const Color(0xffF9D657),
+    const Color(0xff9f8937),
     const Color(0xff364F6B),
     const Color(0xff008891),
-    const Color(0xff3FC1C9),
-    const Color(0xffFC5185),
+    const Color(0xff2e7e83),
+    const Color(0xffad2b53),
     const Color(0xff161D6F),
-    const Color(0xff7FFF97),
-    const Color(0xffFFD25A),
+    const Color(0xff338f44),
+    const Color(0xff624800),
   ];
 
   @override

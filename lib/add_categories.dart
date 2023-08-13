@@ -43,7 +43,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
     return;
   }
 
-  Widget? _buildCategoryDeletionButton(CategoryEntry entry) {
+  Widget? _buildCategoryDeletionButton(CategoryEntry entry, bool chosen) {
     if (_isEditing) {
       if (entry.id == ExpenseDatabase.nullCategory.id) {
         return null;
@@ -55,6 +55,8 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
           _removeCategory(entry);
         },
       );
+    } else if (chosen){
+      return IconButton(onPressed: () {}, icon: const Icon(Icons.check));
     }
     return null;
   }
@@ -96,10 +98,11 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
                   CategoryEntry entry = categories[index];
                   return Card(
                     child: ListTile(
+                      selectedTileColor: entry.color,
                       tileColor: entry.color,
-                      leading: Icon(entry.icon),
-                      title: Text(entry.name),
-                      trailing: _buildCategoryDeletionButton(entry),
+                      leading: Icon(entry.icon, color: Colors.white),
+                      title: Text(entry.name, style: TextStyle(color: Colors.white)),
+                      trailing: _buildCategoryDeletionButton(entry, chosen?.id == entry.id),
                       selected: chosen?.id == entry.id,
                       onTap: _isEditing || widget.chosen != null
                           ? () => _handleTileTap(context, entry)
@@ -127,7 +130,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
                   }, null);
                 },
                 child: Icon(Icons.add,
-                    color: Theme.of(context).colorScheme.onPrimary),
+                    color: Theme.of(context).colorScheme.onPrimaryContainer),
               )
             : null,
       ),
