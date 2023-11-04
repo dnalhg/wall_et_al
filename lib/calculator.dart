@@ -32,7 +32,7 @@ class _CalculatorState extends State<Calculator> {
 
   void _resetState({ExpenseEntry? entry}) {
     if (entry == null) {
-      _currentInput = '';
+      _currentInput = '0';
     } else {
       _currentInput = _getComputedAmountAsString(entry.amount);
       WidgetsBinding.instance
