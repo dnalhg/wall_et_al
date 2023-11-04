@@ -1,15 +1,26 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-class ExcludeCategories with ChangeNotifier {
-  Set<int> _excludeCategories = {};
+class IncludeCategories with ChangeNotifier {
+  Set<int> _includeCategories = {};
 
-  Set<int> get excludeCategories => _excludeCategories;
+  Set<int> get includeCategories => _includeCategories;
 
-  set excludeCategories(Set<int> value) {
-    _excludeCategories = value;
+  set includeCategories(Set<int> value) {
+    _includeCategories = value;
     notifyListeners();
   }
+}
+
+class IncludeTags with ChangeNotifier {
+  Set<int> _includeTags = {};
+  Set<int> get includeTags => _includeTags;
+
+  set includeTags(Set<int> value) {
+    _includeTags = value;
+    notifyListeners();
+  }
+
 }
 
 class TimeFilter with ChangeNotifier {

@@ -70,9 +70,9 @@ class _CostBreakdownState extends State<CostBreakdown> {
   }
 
   Future<List<ExpenseEntry>> _getExpenses(
-      {String? timeFilter, Set<int>? excludeCategories}) {
+      {String? timeFilter, Set<int>? includeCategories, Set<int>? includeTags}) {
     _expenses = ExpenseDatabase.instance.getExpenses(
-        timeFilter: timeFilter, excludeCategories: excludeCategories);
+        timeFilter: timeFilter, includeCategories: includeCategories, includeTags: includeTags);
     _getTotalExpense(_expenses!);
     return _expenses!;
   }
@@ -100,15 +100,18 @@ class _CostBreakdownState extends State<CostBreakdown> {
 
   @override
   Widget build(BuildContext context) {
-    var excludeCategories = Provider.of<ExcludeCategories>(context);
+    var excludeCategories = Provider.of<IncludeCategories>(context);
     var timeFilter = Provider.of<TimeFilter>(context);
+    var includeTags = Provider.of<IncludeTags>(context);
     Provider.of<ExpenseDatabase>(context);
 
     return FutureBuilder(
         future: Future.wait([
           _getExpenses(
               timeFilter: timeFilter.timeFilter,
-              excludeCategories: excludeCategories.excludeCategories),
+              includeCategories: excludeCategories.includeCategories,
+              includeTags: includeTags.includeTags
+          ),
           ExpenseDatabase.instance.getCategories()
         ]),
         builder: (context, snapshot) {

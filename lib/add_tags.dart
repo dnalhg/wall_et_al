@@ -42,13 +42,13 @@ class _TagsPageState extends State<TagsPage> {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancel'),
+              child: Text('Cancel', style: Theme.of(context).textTheme.bodyLarge),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('Done'),
+              child: Text('Done', style: Theme.of(context).textTheme.bodyLarge),
               onPressed: () async {
                 if (textEditingController.text.isNotEmpty &&
                     textEditingController.text.trim().toLowerCase() !=

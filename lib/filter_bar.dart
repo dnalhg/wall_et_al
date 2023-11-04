@@ -59,7 +59,8 @@ class _FilterBarState extends State<FilterBar> {
     _TimeFilterGranularity.Year,
   ];
 
-  Set<int> _unselectedCategories = {};
+  Set<int> _selectedCategories = {};
+  Set<int> _selectedTags = {};
 
   String _getCurrentTimePeriodAsFilterString() {
     int startTime;
@@ -177,12 +178,20 @@ class _FilterBarState extends State<FilterBar> {
 
   bool _isExpanded() => widget.getExpansionState();
 
-  void updateCategories(Set<int> newUnselectedCategories) {
+  void updateCategories(Set<int> selectedCategories) {
     setState(() {
-      _unselectedCategories = newUnselectedCategories;
+      _selectedCategories = selectedCategories;
     });
-    final provider = Provider.of<ExcludeCategories>(context, listen: false);
-    provider.excludeCategories = _unselectedCategories;
+    final provider = Provider.of<IncludeCategories>(context, listen: false);
+    provider.includeCategories = _selectedCategories;
+  }
+
+  void updateTags(Set<int> newTags) {
+    setState(() {
+      _selectedTags = newTags;
+    });
+    final provider = Provider.of<IncludeTags>(context, listen: false);
+    provider.includeTags = _selectedTags;
   }
 
   Widget _buildFilterInternals(BuildContext context) {
@@ -192,26 +201,18 @@ class _FilterBarState extends State<FilterBar> {
               ElevatedButton(
                   onPressed: () {
                     updateCategories({});
+                    updateTags({});
                   },
                   style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.onPrimary),
-                  child: Text("Select All",
+                  child: Text("Reset",
                       style: Theme.of(context).primaryTextTheme.bodyMedium)),
-              ElevatedButton(
-                  onPressed: () async {
-                    var categories =
-                        await ExpenseDatabase.instance.getCategories();
-                    updateCategories(categories.map((e) => e.id!).toSet());
-                  },
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.onPrimary),
-                  child: Text("Unselect All",
-                      style: Theme.of(context).primaryTextTheme.bodyMedium))
             ]),
+            Padding(padding: const EdgeInsets.only(top: 15), child: Text("Categories", style: Theme.of(context).primaryTextTheme.bodyLarge)),
             SizedBox(
-              height: 100,
+              height: 75,
               child: Padding(
-                  padding: const EdgeInsets.only(top: 5.0, left: 15, right: 15),
+                  padding: const EdgeInsets.only(left: 15, right: 15),
                   child: FutureBuilder<List<CategoryEntry>>(
                       future: ExpenseDatabase.instance.getCategories(),
                       builder: (context, snapshot) {
@@ -248,12 +249,12 @@ class _FilterBarState extends State<FilterBar> {
                                                       .primaryTextTheme
                                                       .bodyMedium)
                                             ]),
-                                        selected: !_unselectedCategories
+                                        selected: _selectedCategories
                                             .contains(e.id),
                                         onSelected: (val) {
                                           var newCategories =
-                                              _unselectedCategories;
-                                          !val && e.id != null
+                                              _selectedCategories;
+                                          val && e.id != null
                                               ? newCategories.add(e.id!)
                                               : newCategories.remove(e.id);
                                           updateCategories(newCategories);
@@ -266,7 +267,53 @@ class _FilterBarState extends State<FilterBar> {
                         }
                         return Text("loading...");
                       })),
-            )
+            ),
+      Padding(padding: const EdgeInsets.only(top: 15), child: Text("Tags", style: Theme.of(context).primaryTextTheme.bodyLarge)),
+      SizedBox(
+        height: 75,
+        child: Padding(
+            padding: const EdgeInsets.only(left: 15, right: 15),
+            child: FutureBuilder<List<TagEntry>>(
+                future: ExpenseDatabase.instance.getTags(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    snapshot.data?.sort((a, b) {
+                      return a.tagName.compareTo(b.tagName);
+                    });
+                    List<Widget>? filterChips = snapshot.data
+                        ?.map<Widget>((e) => Padding(
+                      padding: const EdgeInsets.only(
+                          left: 5, right: 5),
+                      child: FilterChip(
+                          selectedColor: Theme.of(context)
+                              .colorScheme
+                              .onPrimary,
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .secondaryContainer,
+                          label: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text( e.tagName[0].toUpperCase() + e.tagName.substring(1),
+                                    style: Theme.of(context)
+                                        .primaryTextTheme
+                                        .bodyMedium)
+                              ]),
+                          selected: _selectedTags.contains(e.id),
+                          onSelected: (val) {
+                            var newSelectedTags = _selectedTags;
+                            val && e.id != null ? newSelectedTags.add(e.id!) : newSelectedTags.remove(e.id!);
+                            updateTags(newSelectedTags);
+                          }),
+                    ))
+                        .toList();
+                    return ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: filterChips ?? []);
+                  }
+                  return Text("loading...");
+                })),
+      ),
           ]
         : [];
 
@@ -329,7 +376,7 @@ class _FilterBarState extends State<FilterBar> {
 
   double _getHeight() {
     if (_isExpanded()) {
-      return 250;
+      return 300;
     }
     return _containerHeight + _toggleButtonHeight / 2;
   }

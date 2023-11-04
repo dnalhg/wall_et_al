@@ -19,7 +19,8 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (_) => TimeFilter()),
-    ChangeNotifierProvider(create: (_) => ExcludeCategories()),
+    ChangeNotifierProvider(create: (_) => IncludeCategories()),
+    ChangeNotifierProvider(create: (_) => IncludeTags()),
     ChangeNotifierProvider(create: (_) => ExpenseTotal()),
     ChangeNotifierProvider(create: (_) => ExpenseDatabase.instance)
   ], child: MyApp()));

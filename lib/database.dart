@@ -21,7 +21,7 @@ class ExpenseDatabase with ChangeNotifier {
 
   static Future<Database> _initDatabase() async {
     String dbPath = join(await getDatabasesPath(), 'expense_database.db');
-    databaseFactory.deleteDatabase(dbPath);
+    // databaseFactory.deleteDatabase(dbPath);
     return openDatabase(
       dbPath,
       onCreate: (db, version) async {
@@ -102,21 +102,37 @@ class ExpenseDatabase with ChangeNotifier {
   /// [timeFilter] is a string of the format 'startTime-endTime' where startTime
   /// is inclusive and endTime is exclusive
   Future<List<ExpenseEntry>> getExpenses(
-      {String? timeFilter, Set<int>? excludeCategories}) async {
+      {String? timeFilter, Set<int>? includeCategories, Set<int>? includeTags}) async {
     if (timeFilter == null) return [];
-    excludeCategories ??= {};
+    includeCategories ??= {};
+    // if this is empty then dont add a line, otherwise add a line to filter
+    includeTags ??= {};
     final db = await _database;
     List<String> timeRange = timeFilter.split('-');
     String startTime = timeRange.first;
     String endTime = timeRange.last;
-    String placeholders =
-        List<String>.filled(excludeCategories.length, '?').join(',');
-    Future<List<Map<String, Object?>>> queryResult = db.query(
-      _expenseTableName,
-      where:
-          'ms_since_epoch >= ? AND ms_since_epoch < ? AND category_id NOT IN ($placeholders)',
-      whereArgs: [startTime, endTime, ...excludeCategories.toList()],
-    );
+    var categories = await getCategories();
+
+    var query = '''
+      SELECT DISTINCT e.*
+      FROM $_expenseTableName e join $_expensesToTagsTable et
+      ON e.id = et.expense_id
+      WHERE
+      e.ms_since_epoch >= $startTime AND e.ms_since_epoch < $endTime
+    ''';
+
+    if (includeCategories.isNotEmpty) {
+      var includeCategoriesStr = includeCategories.join(',');
+      query += " AND e.category_id IN ($includeCategoriesStr) ";
+    }
+
+    if (includeTags.isNotEmpty) {
+      var includeTagStr = includeTags.join(",");
+      query += " AND et.tag_id in ($includeTagStr) ";
+    }
+
+    var queryResult = db.rawQuery(query);
+
     List<ExpenseEntry> expenses =
         (await queryResult).map((m) => ExpenseEntry.fromMap(m)).toList();
     expenses.sort((e1, e2) => e1.msSinceEpoch.compareTo(e2.msSinceEpoch) * -1);
